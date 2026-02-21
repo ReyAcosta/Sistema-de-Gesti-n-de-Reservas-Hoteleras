@@ -9,6 +9,11 @@ public record HuespedResponse(
 		String email,
 		String telefono, 
 		String documento,
+<<<<<<< Updated upstream
 		String nacionalidad
+=======
+		String nacionalidad,
+		EstadoRegistro estadoRegistro
+>>>>>>> Stashed changes
 
 	){}
