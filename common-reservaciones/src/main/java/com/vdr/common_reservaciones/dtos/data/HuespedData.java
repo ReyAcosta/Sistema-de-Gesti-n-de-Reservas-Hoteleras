@@ -1,8 +1,6 @@
-package com.vdr.common_reservaciones.dtos.huespedes;
+package com.vdr.common_reservaciones.dtos.data;
 
-
-public record HuespedResponse(
-		Long id, 
+public record HuespedData(
 		String nombre, 
 		String apellidoPaterno,
 		String apellidoMaterno,
@@ -10,5 +8,6 @@ public record HuespedResponse(
 		String telefono, 
 		String documento,
 		String nacionalidad
-
-	){}
+		) {
+	
+}

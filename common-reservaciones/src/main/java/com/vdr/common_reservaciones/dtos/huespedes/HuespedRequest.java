@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record HuespedRequest(
@@ -25,13 +26,15 @@ public record HuespedRequest(
 	    String email,
 
 	    @NotBlank(message = "El teléfono es obligatorio")
-	    @Pattern(regexp = "\\d{10}", message = "El teléfono debe tener exactamente 10 dígitos")
+	    @Pattern(regexp = "^[0-9]{10}$", message = "El teléfono debe tener exactamente 10 dígitos")
 	    String telefono,
 
 	    @NotBlank(message = "El documento es obligatorio")
+	    @Size(min = 12, max = 12, message = "El documento debe de tener minimos 12 caracteres" )
 	    String documento,
 
 	    @NotNull(message = "La nacionalidad es obligatoria")
-	    Short nacionalidad
+	    @Positive(message = "El id de la nacionalidad es requerida")
+	    Long idNacionalidad
 
 	) {}
