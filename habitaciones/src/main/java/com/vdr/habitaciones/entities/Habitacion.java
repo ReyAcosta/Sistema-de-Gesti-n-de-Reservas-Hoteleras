@@ -1,5 +1,7 @@
 package com.vdr.habitaciones.entities;
 
+import java.math.BigDecimal;
+
 import com.vdr.common_reservaciones.enums.EstadoHabitacion;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.common_reservaciones.enums.TipoHabitacion;
@@ -43,7 +45,7 @@ public class Habitacion{
 
 	    @Positive
 	    @Column(name = "PRECIO", nullable = false)
-	    private Double precio;
+	    private BigDecimal precio;
 
 	    @Min(value = 1)
 	    @Column(name = "CAPACIDAD", nullable = false)

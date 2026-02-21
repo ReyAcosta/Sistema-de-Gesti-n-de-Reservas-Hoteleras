@@ -43,10 +43,10 @@ public class Reservacion{
 	    @Column(name = "FECHA_RESERVA", updatable = false, insertable = false)
 	    private LocalDateTime fechaReserva;
 	    
-	    @Column(name = "FECHA_ENTRADA", updatable = false, insertable = false)
+	    @Column(name = "FECHA_INICIO", updatable = false, insertable = false)
 	    private LocalDateTime fechaEntrada;
 	    
-	    @Column(name = "FECHA_SALIDA", updatable = false, insertable = false)
+	    @Column(name = "FECHA_FIN", updatable = false, insertable = false)
 	    private LocalDateTime fechaSalida;
 	
 	    @Column(name = "ESTADO_RESERVA", nullable = false)
