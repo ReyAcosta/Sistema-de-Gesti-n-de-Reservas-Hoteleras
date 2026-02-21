@@ -1,0 +1,39 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: habitaciones-msv
+              uri: lb://habitaciones-msv
+              predicates:
+                - Path=/api/habitaciones/**
+              filters:
+                - StripPrefix=2
+
+            - id: reservaciones-msv
+              uri: lb://reservaciones-msv
+              predicates:
+                - Path=/api/reservaciones/**
+              filters:
+                - StripPrefix=2
+
+            - id: huespedes-msv
+              uri: lb://huespedes-msv
+              predicates:
+              - Path=/api/huespedes/**
+              filters:
+               - StripPrefix=2
+    loadbalancer:
+      enabled: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
