@@ -44,9 +44,8 @@ public class Reservacion{
 	    private LocalDateTime fechaReserva;
 	    
 	    @Column(name = "FECHA_INICIO", updatable = false, insertable = false)
-	    private LocalDateTime fechaInicio;
-	    
-	    
+		private LocalDateTime fechaInicio;
+	    	    
 	    @Column(name = "FECHA_FIN", updatable = false, insertable = false)
 	    private LocalDateTime fechaFin;
 

@@ -22,6 +22,7 @@ public record HabitacionRequest(
 	    BigDecimal precio,
 
 
+
 	    @NotNull(message = "La capacidad es requerida")
 	    @Min(value = 1, message = "La capacidad mínima es 1")
 	    Short capacidad,
