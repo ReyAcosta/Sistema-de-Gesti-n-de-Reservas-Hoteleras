@@ -29,8 +29,6 @@ public enum EstadoReserva {
                 return e;
             }
         }
-
         throw new IllegalArgumentException( "Descripción no válida: " + descripcion)  ;
     }
 }
-

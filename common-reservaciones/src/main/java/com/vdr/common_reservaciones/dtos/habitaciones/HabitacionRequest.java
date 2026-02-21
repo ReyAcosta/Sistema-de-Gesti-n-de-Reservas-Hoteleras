@@ -1,6 +1,6 @@
 package com.vdr.common_reservaciones.dtos.habitaciones;
 
-import java.math.BigDecimal;
+import java.math.BigDecimal; 
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -20,6 +20,7 @@ public record HabitacionRequest(
 	    @NotNull(message = "El precio es obligatorio")
 	    @DecimalMin(value= "1.0", message = "El precio debe ser mayor a 0")
 	    BigDecimal precio,
+
 
 	    @NotNull(message = "La capacidad es requerida")
 	    @Min(value = 1, message = "La capacidad mínima es 1")

@@ -3,8 +3,8 @@ package com.vdr.reservaciones.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vdr.common_reservaciones.controllers.CommonController;
-import com.vdr.reservaciones.dto.ReservacionRequest;
-import com.vdr.reservaciones.dto.ReservacionResponse;
+import com.vdr.reservaciones.dtos.ReservacionRequest;
+import com.vdr.reservaciones.dtos.ReservacionResponse;
 import com.vdr.reservaciones.services.ReservacionService;
 
 @RestController

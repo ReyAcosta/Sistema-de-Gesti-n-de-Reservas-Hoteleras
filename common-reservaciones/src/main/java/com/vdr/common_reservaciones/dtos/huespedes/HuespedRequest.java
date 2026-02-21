@@ -33,8 +33,7 @@ public record HuespedRequest(
 	    @Size(min = 12, max = 12, message = "El documento debe de tener minimos 12 caracteres" )
 	    String documento,
 
-	    @NotNull(message = "La nacionalidad es obligatoria")
-	    @Positive(message = "El id de la nacionalidad es requerida")
-	    Long idNacionalidad
+	    @NotBlank(message = "La nacionalidad es requerida")
+	    String nacionalidad
 
 	) {}
