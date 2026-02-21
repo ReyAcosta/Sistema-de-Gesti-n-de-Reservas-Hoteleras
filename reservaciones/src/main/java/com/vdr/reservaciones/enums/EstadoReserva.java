@@ -3,17 +3,13 @@ package com.vdr.reservaciones.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@Getter
 @AllArgsConstructor
 public enum EstadoReserva {
           CONFIRMADA(1L, "Reserva creada"),
-<<<<<<< Updated upstream
           EN_CURSO(2L, "Check-in realizado"),
           FINALIZADA(3L, "Check-out realizado"),
-=======
-   	  EN_CURSO(2L, "Check-in realizado"),
-	  FINALIZADA(3L, "Check-out realizado"),
->>>>>>> Stashed changes
+     	  EN_CURSO(2L, "Check-in realizado"),
+	     FINALIZADA(3L, "Check-out realizado"),
           CANCELADA(4L, "Reserva cancelada");
 
 	    private final Long codigo;
@@ -34,12 +30,8 @@ public enum EstadoReserva {
                 return e;
             }
         }
-<<<<<<< Updated upstream
         throw new IllegalArgumentException( "Descripción no válida: " + descripcion)  ;
     }
-}
-=======
         throw new IllegalArgumentException( "Descripción no válida: " + descripcion);
     }
 }
->>>>>>> Stashed changes
