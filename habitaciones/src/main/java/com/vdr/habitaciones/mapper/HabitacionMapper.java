@@ -20,10 +20,10 @@ public class HabitacionMapper implements CommonMapper<HabitacionRequest, Habitac
 		return new HabitacionResponse(
 					entity.getId(),
 					entity.getNumeroHabitacion(),
-					entity.getTipoHabitacion(),
+					entity.getTipoHabitacion().getDescripcion(),
 					entity.getPrecio(),
 					entity.getCapacidad(),
-					entity.getEstadoHabitacion()
+					entity.getEstadoHabitacion().getDescripcion()
 				);
 	}
 
@@ -41,8 +41,13 @@ public class HabitacionMapper implements CommonMapper<HabitacionRequest, Habitac
 
 	@Override
 	public Habitacion updateEntityFromRequest(HabitacionRequest request, Habitacion entity) {
-		// TODO Auto-generated method stub
-		return null;
+		if(entity == null || request == null) return null;
+		entity.setNumeroHabitacion(request.numeroHabitacion());
+		entity.setTipoHabitacion(TipoHabitacion.fromCodigo(request.idTipoHabitacion()));
+		entity.setPrecio(request.precio());
+		entity.setCapacidad(request.capacidad());
+		
+		return entity;
 	}
 
 }

@@ -33,20 +33,24 @@ public class HabitacionServiceImpl implements HabitacionService{
 	@Override
 	@Transactional
 	public HabitacionResponse obtenerPorId(Long id) {
-		// TODO Auto-generated method stub
 		return habitacionMapper.entityToResponse(getHabitacionOrThrow(id));
 	}
 
 	@Override
 	public HabitacionResponse registrar(HabitacionRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Habitacion habitacion = habitacionRepository.save(habitacionMapper.requestToEntity(request));
+		
+		return habitacionMapper.entityToResponse(habitacion);
 	}
 
 	@Override
 	public HabitacionResponse actualizar(HabitacionRequest request, Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		Habitacion habitacion = getHabitacionOrThrow(id);
+		habitacionMapper.updateEntityFromRequest(request, habitacion);
+		
+		
+		return habitacionMapper.entityToResponse(habitacion);
 	}
 
 	@Override

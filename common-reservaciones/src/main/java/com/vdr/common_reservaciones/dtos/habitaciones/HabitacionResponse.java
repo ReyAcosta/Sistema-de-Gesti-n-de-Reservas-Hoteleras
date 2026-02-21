@@ -8,9 +8,9 @@ import com.vdr.common_reservaciones.enums.TipoHabitacion;
 public record HabitacionResponse(
 		Long id, 
 		Short numeroHabitacion,
-		TipoHabitacion tipoHabitacion, 
+		String tipoHabitacion, 
 		BigDecimal precio, 
 		Short capacidad, 
-		EstadoHabitacion estadoHabitacion
+		String estadoHabitacion
 
 	){}

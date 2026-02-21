@@ -18,7 +18,8 @@ public record HabitacionRequest(
 
 	    @NotNull(message = "El precio es obligatorio")
 	    @Min(value= 1, message = "El precio debe ser mayor a 0")
-	    BigDecimal precio,
+		BigDecimal precio,
+
 
 	    @NotNull(message = "La capacidad es requerida")
 	    @Min(value = 1, message = "La capacidad mínima es 1")
