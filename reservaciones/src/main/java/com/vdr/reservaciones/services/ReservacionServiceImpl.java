@@ -5,8 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
-import com.vdr.reservaciones.dto.ReservacionRequest;
-import com.vdr.reservaciones.dto.ReservacionResponse;
+import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
+import com.vdr.reservaciones.dtos.ReservacionRequest;
+import com.vdr.reservaciones.dtos.ReservacionResponse;
 import com.vdr.reservaciones.entities.Reservacion;
 import com.vdr.reservaciones.mapper.ReservacionMapper;
 import com.vdr.reservaciones.repositories.ReservacionRepository;
@@ -19,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 @Transactional
-public class ReservacionImple implements ReservacionService{
+public class ReservacionServiceImpl implements ReservacionService{
 	private final ReservacionRepository reservacionRepository;
 	private final ReservacionMapper reservacionMapper;
 
@@ -66,7 +67,7 @@ public class ReservacionImple implements ReservacionService{
 	                .findById(id)
 	                .filter(r -> r.getEstadoRegistro() == EstadoRegistro.ACTIVO)
 	                .orElseThrow(() ->
-	                        new IllegalArgumentException("Reservación no encontrada"));
+	                        new EntidadRelacionadaException("Reservación no encontrada"));
 
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
@@ -83,7 +84,7 @@ public class ReservacionImple implements ReservacionService{
                 .findById(id)
                 .filter(r -> r.getEstadoRegistro() == EstadoRegistro.ACTIVO)
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Reservación no encontrada"));
+                        new EntidadRelacionadaException("Reservación no encontrada"));
 
         reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 

@@ -35,6 +35,6 @@ public record HuespedRequest(
 
 	    @NotNull(message = "La nacionalidad es obligatoria")
 	    @Positive(message = "El id de la nacionalidad es requerida")
-	    Long idNacionalidad
+	    String nacionalidad
 
 	) {}
