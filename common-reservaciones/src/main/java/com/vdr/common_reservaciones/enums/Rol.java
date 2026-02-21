@@ -12,6 +12,15 @@ public enum Rol{
 
     private final Long codigo;
     private final String descripcion;
+    
+    public static Rol fromCodigo(Long codigo) {
+        for (Rol e : values()) {
+            if (e.getCodigo().equals(codigo)) {
+                return e;
+            }
+        }
+        throw new IllegalArgumentException("Código de cita no válido: " + codigo);
+    }
 
     public static Rol fromDescripcion(String descripcion) {
         for (Rol e : values()) {
