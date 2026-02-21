@@ -3,7 +3,7 @@ package com.vdr.reservaciones.entities;
 import java.time.LocalDateTime;
 
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
-import com.vdr.common_reservaciones.enums.EstadoReserva;
+import com.vdr.reservaciones.enums.EstadoReserva;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,6 +42,12 @@ public class Reservacion{
 
 	    @Column(name = "FECHA_RESERVA", updatable = false, insertable = false)
 	    private LocalDateTime fechaReserva;
+	    
+	    @Column(name = "FECHA_ENTRADA", updatable = false, insertable = false)
+	    private LocalDateTime fechaEntrada;
+	    
+	    @Column(name = "FECHA_SALIDA", updatable = false, insertable = false)
+	    private LocalDateTime fechaSalida;
 	
 	    @Column(name = "ESTADO_RESERVA", nullable = false)
         @Enumerated(EnumType.STRING)
