@@ -2,9 +2,11 @@ package com.vdr.reservaciones.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.vdr.common_reservaciones.dtos.habitaciones.DatosHabitacion;
+import com.vdr.common_reservaciones.dtos.data.HabitacionData;
+import com.vdr.common_reservaciones.dtos.data.HuespedData;
+
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
-import com.vdr.common_reservaciones.dtos.huespedes.DatosHuesped;
+
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.common_reservaciones.mappers.CommonMapper;
@@ -75,10 +77,10 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 		entity.setEstadoReserva(estadoReserva);
 		return entity; 
 	}
-	private DatosHuesped datosHuespedFromHuespedResponse(HuespedResponse huesped) {
+	private HuespedData datosHuespedFromHuespedResponse(HuespedResponse huesped) {
 		if (huesped == null) return null;
 		
-		return new DatosHuesped(
+		return new HuespedData(
 				huesped.nombre(),
 			    huesped.apellidoPaterno(),
 			    huesped.apellidoMaterno(),
@@ -88,15 +90,16 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 			    huesped.nacionalidad()
 				);
 	}
-	private DatosHabitacion datosHabitacionFromHabitacionResponse(HabitacionResponse habitacion) {
+	private HabitacionData datosHabitacionFromHabitacionResponse(HabitacionResponse habitacion) {
 		
 		 if (habitacion == null) return null;
 
-		    return new DatosHabitacion(
+		    return new HabitacionData(
 		    		habitacion.numeroHabitacion(),
-		    	    habitacion.tipoHabitacion().getDescripcion(),
+		    	    habitacion.tipoHabitacion(),
 		    	    habitacion.precio(),
-		    	    habitacion.estadoRegistro().name()
+		    	    habitacion.capacidad(),
+		    	    habitacion.estadoHabitacion()
 		        );
 		    
 }
