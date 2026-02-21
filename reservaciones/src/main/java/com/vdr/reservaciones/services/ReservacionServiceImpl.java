@@ -1,6 +1,7 @@
 package com.vdr.reservaciones.services;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
@@ -27,25 +28,15 @@ public class ReservacionServiceImpl implements ReservacionService{
 	@Override
 	public List<ReservacionResponse> listar() {
 		log.info("Listando reservaciones activas");
-
-        return reservacionRepository
-                .findByEstadoRegistro(EstadoRegistro.ACTIVO)
-                .stream()
-                .map(reservacionMapper::entityToResponse)
-                .toList();
+		return reservacionRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO).stream()
+				.map(reservacionMapper::entityToResponse).toList();		
+		
 	}
 
 	@Override
 	public ReservacionResponse obtenerPorId(Long id) {
 		log.info("Obteniendo reservación con id: {}", id);
-
-        Reservacion reservacion = reservacionRepository
-                .findById(id)
-                .filter(r -> r.getEstadoRegistro() == EstadoRegistro.ACTIVO)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Reservación no encontrada"));
-
-        return reservacionMapper.entityToResponse(reservacion);
+		return reservacionMapper.entityToResponse(getReservacionOrThrow(id));
 	}
 
 	@Override
@@ -63,33 +54,33 @@ public class ReservacionServiceImpl implements ReservacionService{
 	public ReservacionResponse actualizar(ReservacionRequest request, Long id) {
 		 log.info("Actualizando reservación con id: {}", id);
 
-	        Reservacion reservacion = reservacionRepository
-	                .findById(id)
-	                .filter(r -> r.getEstadoRegistro() == EstadoRegistro.ACTIVO)
-	                .orElseThrow(() ->
-	                        new EntidadRelacionadaException("Reservación no encontrada"));
+	        Reservacion reservacion = getReservacionOrThrow(id);
 
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
-	        Reservacion actualizada = reservacionRepository.save(reservacion);
-
-	        return reservacionMapper.entityToResponse(actualizada);
+	        return reservacionMapper.entityToResponse(reservacion);
 	}
 
 	@Override
 	public void eliminar(Long id) {
 		log.info("Eliminando reservación con id: {}", id);
-
-        Reservacion reservacion = reservacionRepository
-                .findById(id)
-                .filter(r -> r.getEstadoRegistro() == EstadoRegistro.ACTIVO)
-                .orElseThrow(() ->
-                        new EntidadRelacionadaException("Reservación no encontrada"));
-
+        Reservacion reservacion = getReservacionOrThrow(id);
+        
         reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
-
-        reservacionRepository.save(reservacion);
-		
+	}
+	
+	/*-------------------Comienzan metodos privados-----------*/
+	
+	private Reservacion getReservacionOrThrow(Long id) {
+		log.info("Buscando reservacion activa por id: {}",id);
+		return reservacionRepository.findByIdAndEstadoRegistro(id, EstadoRegistro.ACTIVO).orElseThrow(
+				()-> new NoSuchElementException("No se econtro reservacion activa con id: " + id));
+	}
+	
+	private Reservacion getReservacionOrThrowSinEstado(Long id) {
+		log.info("Buscando reservacion activa por id: {}",id);
+		return reservacionRepository.findById(id).orElseThrow(
+				()-> new NoSuchElementException("No se econtro reservacion con id: " + id));
 	}
 
 }

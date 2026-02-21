@@ -1,6 +1,7 @@
 package com.vdr.huespedes.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -11,4 +12,7 @@ import com.vdr.huespedes.entities.Huesped;
 @Repository
 public interface HuespedRepository extends JpaRepository<Huesped, Long>{
 	List<Huesped> findByEstadoRegistro(EstadoRegistro estadoRegistro);
+	
+	Optional<Huesped> findByIdAndEstadoRegistro(Long id, EstadoRegistro estadoRegistro);
+
 }

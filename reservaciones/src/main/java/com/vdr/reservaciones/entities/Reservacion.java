@@ -46,9 +46,9 @@ public class Reservacion{
 	    @Column(name = "FECHA_INICIO", updatable = false, insertable = false)  
 	    private LocalDateTime fechaInicio;
 	    
-	    
 	    @Column(name = "FECHA_FIN", updatable = false, insertable = false)
 	    private LocalDateTime fechaFin;
+
 	
 	    @Column(name = "ESTADO_RESERVA", nullable = false)
         @Enumerated(EnumType.STRING)

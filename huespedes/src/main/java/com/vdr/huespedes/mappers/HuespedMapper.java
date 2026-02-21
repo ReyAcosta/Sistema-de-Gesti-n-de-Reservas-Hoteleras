@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedRequest;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
+import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.common_reservaciones.mappers.CommonMapper;
 import com.vdr.huespedes.entities.Huesped;
 
@@ -40,6 +41,8 @@ public class HuespedMapper implements CommonMapper<HuespedRequest, HuespedRespon
                 .email(request.email())
                 .telefono(request.telefono())
                 .documento(request.documento())
+                .nacionalidad(request.nacionalidad())
+                .estadoRegistro(EstadoRegistro.ACTIVO)
                 .build();
 	}
 	
