@@ -20,7 +20,7 @@ public enum TipoHabitacion{
                 return e;
             }
         }
-        throw new IllegalArgumentException("Código de cita no válido: " + codigo);
+        throw new IllegalArgumentException("Código de habitacion no válido: " + codigo);
     }
 	
 	public static TipoHabitacion fromDescripcion(String descripcion) {

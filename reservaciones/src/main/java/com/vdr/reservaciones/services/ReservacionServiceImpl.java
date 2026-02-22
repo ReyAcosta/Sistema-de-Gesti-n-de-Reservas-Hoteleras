@@ -1,12 +1,18 @@
 package com.vdr.reservaciones.services;
 
 import java.util.List;
+
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
+import com.vdr.common_reservaciones.clients.HabitacionClient;
+import com.vdr.common_reservaciones.clients.HuespedClient;
+
+import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
+import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
-import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
+
 import com.vdr.reservaciones.dtos.ReservacionRequest;
 import com.vdr.reservaciones.dtos.ReservacionResponse;
 import com.vdr.reservaciones.entities.Reservacion;
@@ -24,13 +30,17 @@ import lombok.extern.slf4j.Slf4j;
 public class ReservacionServiceImpl implements ReservacionService{
 	private final ReservacionRepository reservacionRepository;
 	private final ReservacionMapper reservacionMapper;
+	private final HuespedClient huespedClient;
+	private final HabitacionClient habitacionClient;
 
 	@Override
 	public List<ReservacionResponse> listar() {
 		log.info("Listando reservaciones activas");
 		return reservacionRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO).stream()
-				.map(reservacionMapper::entityToResponse).toList();		
-		
+				.map(reserva -> reservacionMapper.entityToResponse(
+						reserva,
+						getHuespedResponse(reserva.getIdHuesped()),
+						getHabitacionResponse(reserva.getIdHabitacion()) )).toList() ;		
 	}
 
 	@Override
@@ -47,7 +57,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 
         Reservacion guardada = reservacionRepository.save(reservacion);
 
-        return reservacionMapper.entityToResponse(guardada);
+        return reservacionMapper.entityToResponse(guardada, getHuespedResponse(request.idHuesped()),getHabitacionResponse(request.idHabitacion()));
 	}
 
 	@Override
@@ -81,6 +91,14 @@ public class ReservacionServiceImpl implements ReservacionService{
 		log.info("Buscando reservacion activa por id: {}",id);
 		return reservacionRepository.findById(id).orElseThrow(
 				()-> new NoSuchElementException("No se econtro reservacion con id: " + id));
+	}
+	
+	private HabitacionResponse getHabitacionResponse(Long id) {
+		return habitacionClient.obtenerHabitacionPorId(id);
+	}
+	
+	private HuespedResponse getHuespedResponse(Long id) {
+		return huespedClient.obtenerHuespedPorId(id);
 	}
 
 }

@@ -1,9 +1,11 @@
 package com.vdr.habitaciones.services;
 
 import java.util.List;
+
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionRequest;
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
@@ -12,7 +14,7 @@ import com.vdr.habitaciones.entities.Habitacion;
 import com.vdr.habitaciones.mapper.HabitacionMapper;
 import com.vdr.habitaciones.repository.HabitacionRepository;
 
-import jakarta.transaction.Transactional;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,22 +25,26 @@ import lombok.extern.slf4j.Slf4j;
 public class HabitacionServiceImpl implements HabitacionService{
 	private final HabitacionRepository habitacionRepository;
 	private final HabitacionMapper habitacionMapper;
+	
+	
 	@Override
+	@Transactional(readOnly = true)
 	public List<HabitacionResponse> listar() {
 		// TODO Auto-generated method stub
-		return habitacionRepository.findAll()
-						.stream().map(Habitacion -> habitacionMapper.entityToResponse(Habitacion)).toList();
+		log.info("Iniciando listar habitaciones activas");
+		return habitacionRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO)
+						.stream().map(habitacionMapper::entityToResponse).toList();
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public HabitacionResponse obtenerPorId(Long id) {
 		return habitacionMapper.entityToResponse(getHabitacionOrThrow(id));
 	}
 
 	@Override
 	public HabitacionResponse registrar(HabitacionRequest request) {
-		
+		log.info("Iniciadno registrar habitacion: {}", request);
 		Habitacion habitacion = habitacionRepository.save(habitacionMapper.requestToEntity(request));
 		
 		return habitacionMapper.entityToResponse(habitacion);
@@ -46,6 +52,7 @@ public class HabitacionServiceImpl implements HabitacionService{
 
 	@Override
 	public HabitacionResponse actualizar(HabitacionRequest request, Long id) {
+		log.info("Iniciando actualizar habitacion con id: {}", id);
 		Habitacion habitacion = getHabitacionOrThrow(id);
 		habitacionMapper.updateEntityFromRequest(request, habitacion);
 		
@@ -56,14 +63,14 @@ public class HabitacionServiceImpl implements HabitacionService{
 	@Override
 	public void eliminar(Long id) {
 		Habitacion habitacion = getHabitacionOrThrow(id);
-		//verificar si no tiene reservas activas
+		
 		habitacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 	}
 	
 	 private Habitacion getHabitacionOrThrow(Long id){
-	        log.info("buscando paciente con id: {}", id);
+	        log.info("Buscando habitacion con id: {}", id);
 	        return  habitacionRepository.findByIdAndEstadoRegistro(id,EstadoRegistro.ACTIVO).orElseThrow(()->
-	                new NoSuchElementException("paciente no encontrado con el id:" +id));
+	                new NoSuchElementException("Habitacion no encontrada con el id:" +id));
 	    }
 	
 }

@@ -8,7 +8,7 @@ import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 
 @FeignClient(name= "habitaciones-msv")
 public interface HabitacionClient {
-	@GetMapping("/id-habitacion/{id}")
+	@GetMapping("/{id}")
 	HabitacionResponse obtenerHabitacionPorId(@PathVariable Long id);
 
 }
