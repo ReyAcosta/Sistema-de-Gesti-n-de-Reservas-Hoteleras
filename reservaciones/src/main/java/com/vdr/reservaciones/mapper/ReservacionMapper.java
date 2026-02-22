@@ -32,6 +32,7 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 				entity.getFechaFin(),
 				entity.getEstadoReserva().getDescripcion());
 	}
+	
 	public ReservacionResponse entityToResponse(Reservacion entity, HuespedResponse huesped, HabitacionResponse habitacion) {
 		if(entity == null) return null;
 		

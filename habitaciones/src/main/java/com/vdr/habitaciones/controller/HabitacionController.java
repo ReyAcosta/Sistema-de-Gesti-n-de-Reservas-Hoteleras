@@ -1,8 +1,7 @@
 package com.vdr.habitaciones.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+
+
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vdr.common_reservaciones.controllers.CommonController;
@@ -11,7 +10,6 @@ import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 import com.vdr.habitaciones.services.HabitacionService;
 
 @RestController
-
 public class HabitacionController extends CommonController<HabitacionRequest, HabitacionResponse, HabitacionService>{
 
 	public HabitacionController(HabitacionService service) {
@@ -19,9 +17,5 @@ public class HabitacionController extends CommonController<HabitacionRequest, Ha
 		// TODO Auto-generated constructor stub
 	}
 	
-	@GetMapping("/id-habitacion/{id}")
-	public ResponseEntity <HabitacionResponse> obtenerHabitacionPorId(@PathVariable Long id){
-		return ResponseEntity.ok(service.obtenerPorId(id));
-	}
 	
 }

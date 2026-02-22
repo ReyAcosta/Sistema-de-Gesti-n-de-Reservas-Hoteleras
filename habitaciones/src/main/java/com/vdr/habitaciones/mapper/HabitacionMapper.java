@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionRequest;
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 import com.vdr.common_reservaciones.enums.EstadoHabitacion;
+import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.common_reservaciones.enums.TipoHabitacion;
 import com.vdr.common_reservaciones.mappers.CommonMapper;
 import com.vdr.habitaciones.entities.Habitacion;
@@ -36,6 +37,7 @@ public class HabitacionMapper implements CommonMapper<HabitacionRequest, Habitac
 				.precio(request.precio())
 				.capacidad(request.capacidad())
 				.estadoHabitacion(EstadoHabitacion.fromCodigo(request.idEstadoHabitacion()))
+				.estadoRegistro(EstadoRegistro.ACTIVO)
 				.build();
 	}
 
