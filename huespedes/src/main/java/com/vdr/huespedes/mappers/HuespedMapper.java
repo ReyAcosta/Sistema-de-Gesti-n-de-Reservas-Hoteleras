@@ -6,6 +6,7 @@ import com.vdr.common_reservaciones.dtos.huespedes.HuespedRequest;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.common_reservaciones.enums.Nacionalidad;
+import com.vdr.common_reservaciones.enums.TipoDocumento;
 import com.vdr.common_reservaciones.mappers.CommonMapper;
 import com.vdr.huespedes.entities.Huesped;
 
@@ -26,13 +27,8 @@ public class HuespedMapper implements CommonMapper<HuespedRequest, HuespedRespon
 				                entity.getApellidoMaterno()),
 		                entity.getEmail(),
 		                entity.getTelefono(),
-<<<<<<< HEAD
-		                entity.getTipoDocumento(),
-		                entity.getNacionalidad());
-=======
-		                entity.getDocumento(),
+		                entity.getTipoDocumento().getDescripcion(),
 		                entity.getNacionalidad().getDescripcion());
->>>>>>> fc1e2758ce6c28820c5d2795ef0aef071c2c6626
         
 	}
 	
@@ -46,12 +42,8 @@ public class HuespedMapper implements CommonMapper<HuespedRequest, HuespedRespon
                 .apellidoMaterno(request.apellidoMaterno())
                 .email(request.email())
                 .telefono(request.telefono())
-<<<<<<< HEAD
-                .nacionalidad(request.nacionalidad())
-=======
-                .documento(request.documento())
+                .tipoDocumento(TipoDocumento.fromCodigo(request.idDocumento()))
                 .nacionalidad(Nacionalidad.fromCodigo(request.idNacionalidad()))
->>>>>>> fc1e2758ce6c28820c5d2795ef0aef071c2c6626
                 .estadoRegistro(EstadoRegistro.ACTIVO)
                 .build();
 	}
@@ -67,12 +59,8 @@ public class HuespedMapper implements CommonMapper<HuespedRequest, HuespedRespon
         entity.setApellidoMaterno(request.apellidoMaterno());
         entity.setEmail(request.email());
         entity.setTelefono(request.telefono());
-<<<<<<< HEAD
-        entity.setNacionalidad(request.nacionalidad());
-=======
-        entity.setDocumento(request.documento());
+        entity.setTipoDocumento(TipoDocumento.fromCodigo(request.idDocumento()));
         entity.setNacionalidad(Nacionalidad.fromCodigo(request.idNacionalidad()));
->>>>>>> fc1e2758ce6c28820c5d2795ef0aef071c2c6626
 
         return entity;
 	}

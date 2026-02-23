@@ -1,11 +1,8 @@
 package com.vdr.huespedes.entities;
 
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
-<<<<<<< HEAD
 import com.vdr.common_reservaciones.enums.TipoDocumento;
-=======
 import com.vdr.common_reservaciones.enums.Nacionalidad;
->>>>>>> fc1e2758ce6c28820c5d2795ef0aef071c2c6626
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

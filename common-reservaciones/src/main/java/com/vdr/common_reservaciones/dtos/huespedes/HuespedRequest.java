@@ -28,20 +28,14 @@ public record HuespedRequest(
 	    @NotBlank(message = "El teléfono es obligatorio")
 	    @Pattern(regexp = "^[0-9]{10}$", message = "El teléfono debe tener exactamente 10 dígitos")
 	    String telefono,
-
-<<<<<<< HEAD
+	    
+	    @NotNull(message = "El id del documento es requerida")
+	    @Positive(message = "El id del documento debe ser positivo")
 	    Long idDocumento, 
 	    
-	    @NotBlank(message = "La nacionalidad es requerida")
-	    String nacionalidad
-=======
-	    @NotBlank(message = "El documento es obligatorio")
-	    @Size(min = 12, max = 12, message = "El documento debe de tener minimos 12 caracteres" )
-	    String documento,
-
 	    @NotNull(message = "El id de la nacionalidad es requerida")
 	    @Positive(message = "El id de la nacionalidad debe ser positivo")
 	    Long idNacionalidad
->>>>>>> fc1e2758ce6c28820c5d2795ef0aef071c2c6626
+
 
 	) {}

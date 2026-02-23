@@ -85,7 +85,7 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 				huesped.nombre(),
 			    huesped.email(),
 			    huesped.telefono(),
-			    huesped.tipoDocumento().getDescripcion(),
+			    huesped.tipoDocumento(),
 			    huesped.nacionalidad()
 				);
 	}
