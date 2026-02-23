@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedRequest;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
+import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
 import com.vdr.huespedes.entities.Huesped;
 import com.vdr.huespedes.mappers.HuespedMapper;
 import com.vdr.huespedes.repositories.HuespedRepository;
@@ -37,20 +38,28 @@ public class HuespedServiceImpl implements HuespedService {
 	}
 	
 	@Override
+	public HuespedResponse obtenerPorIdSinEstado(Long id) {
+        return huespedMapper.entityToResponse(getHuespedOrThrowSinEstado(id));
+	}
+	
+	@Override
 	public HuespedResponse registrar(HuespedRequest request) {
 		log.info("Registrando nuevo huesped");
+		validarDatosUnicos(request);
+		
+        Huesped huesped = huespedRepository.save(huespedMapper.requestToEntity(request));
 
-        Huesped huesped = huespedMapper.requestToEntity(request);
-
-        Huesped guardada = huespedRepository.save(huesped);
-
-        return huespedMapper.entityToResponse(guardada);
+        return huespedMapper.entityToResponse(huesped);
 	}
 	
 	@Override
 	public HuespedResponse actualizar(HuespedRequest request, Long id) {
 		 log.info("Actualizando reservación con id: {}", id);
 	        Huesped huesped = getHuespedOrThrow(id);
+	        
+	        verificarEmailUnicoActualizar(id, huesped.getEmail());
+	        verificarTelefonoUnicoActualizar(id, huesped.getTelefono());
+	        verificarDocumentoUnicoActualizar(id, huesped.getDocumento());
 	        
 	        huespedMapper.updateEntityFromRequest(request, huesped);
 
@@ -81,5 +90,51 @@ public class HuespedServiceImpl implements HuespedService {
 		log.info("Buscando huesped activo con id: " + id);
 		return huespedRepository.findById(id).orElseThrow(
 				() -> new NoSuchElementException("No se encotro un huesped con el id: "+ id));
+	}
+	
+	/*---------verificar datos unicos al registrar---------------*/
+	
+	private void verificarEmailUnico(String email) {
+		if(huespedRepository.existsByEmailIgnoreCaseAndEstadoRegistro(email, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con email: " + email);
+		}
+	}
+	
+	private void verificarTelefonoUnico(String telefono) {
+		if(huespedRepository.existsByTelefonoAndEstadoRegistro(telefono, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con telefono: " + telefono);
+		}
+	}
+	
+	private void verificarDocumentoUnico(String documento) {
+		if(huespedRepository.existsByDocumentoIgnoreCaseAndEstadoRegistro(documento, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + documento);
+		}
+	}
+	
+	private void validarDatosUnicos(HuespedRequest request) {
+		verificarEmailUnico(request.email());
+		verificarTelefonoUnico(request.telefono());
+		verificarDocumentoUnico(request.documento());
+	}
+	
+	/*---------verificar datos unicos al actualizar---------------*/
+	
+	private void verificarEmailUnicoActualizar(Long id, String email) {
+		if(huespedRepository.existsByEmailIgnoreCaseAndIdNotAndEstadoRegistro(email, id, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con email: " + email);
+		}
+	}
+	
+	private void verificarTelefonoUnicoActualizar(Long id, String telefono) {
+		if(huespedRepository.existsByTelefonoAndIdNotAndEstadoRegistro(telefono, id, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con telefono: " + telefono);
+		}
+	}
+	
+	private void verificarDocumentoUnicoActualizar(Long id, String documento) {
+		if(huespedRepository.existsByDocumentoIgnoreCaseAndIdNotAndEstadoRegistro(documento, id, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + documento);
+		}
 	}
 }

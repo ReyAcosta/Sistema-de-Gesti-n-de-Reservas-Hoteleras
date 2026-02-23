@@ -6,4 +6,5 @@ import com.vdr.common_reservaciones.service.CrudService;
 
 public interface HuespedService extends CrudService<HuespedRequest, HuespedResponse>{
 
+	HuespedResponse obtenerPorIdSinEstado(Long id);
 }

@@ -48,7 +48,7 @@ public class HabitacionMapper implements CommonMapper<HabitacionRequest, Habitac
 		entity.setTipoHabitacion(TipoHabitacion.fromCodigo(request.idTipoHabitacion()));
 		entity.setPrecio(request.precio());
 		entity.setCapacidad(request.capacidad());
-		
+		entity.setEstadoHabitacion(EstadoHabitacion.fromCodigo(request.idEstadoHabitacion()));
 		return entity;
 	}
 

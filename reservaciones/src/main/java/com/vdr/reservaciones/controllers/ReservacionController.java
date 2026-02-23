@@ -1,5 +1,8 @@
 package com.vdr.reservaciones.controllers;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vdr.common_reservaciones.controllers.CommonController;
@@ -11,5 +14,11 @@ import com.vdr.reservaciones.services.ReservacionService;
 public class ReservacionController extends CommonController<ReservacionRequest, ReservacionResponse, ReservacionService> {
 	public ReservacionController(ReservacionService service) {
 		super(service);
+	}
+	
+	@PatchMapping("/{idReservacion}/estado/{idEstado}")
+	public ResponseEntity<ReservacionResponse> actualizarEstadoReservacion(@PathVariable Long idReservacion,
+																			@PathVariable Long idEstado){
+		return ResponseEntity.ok(service.actualizarEstadoReserva(idReservacion, idEstado));
 	}
 }

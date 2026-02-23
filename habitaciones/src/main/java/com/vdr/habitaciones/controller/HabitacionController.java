@@ -2,6 +2,10 @@ package com.vdr.habitaciones.controller;
 
 
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vdr.common_reservaciones.controllers.CommonController;
@@ -17,5 +21,15 @@ public class HabitacionController extends CommonController<HabitacionRequest, Ha
 		// TODO Auto-generated constructor stub
 	}
 	
+	@GetMapping("/id-habitacion/{id}")
+	public ResponseEntity<HabitacionResponse> obtenerPorIdSinEstaod(@PathVariable Long id){
+		return ResponseEntity.ok(service.obtenerPorIdSinEstado(id));
+	}
+	
+	@PatchMapping("/{id}/estado/{idEstado}")
+	public ResponseEntity<HabitacionResponse> actualizarEstadoHabitacion(@PathVariable Long id,
+																		@PathVariable Long idEstado){
+		return ResponseEntity.ok(service.actualizarEstadoHabitacion(id, idEstado));
+	}
 	
 }

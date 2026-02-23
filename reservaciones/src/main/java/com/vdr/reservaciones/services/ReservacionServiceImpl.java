@@ -2,9 +2,11 @@ package com.vdr.reservaciones.services;
 
 import java.util.List;
 
+
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vdr.common_reservaciones.clients.HabitacionClient;
 import com.vdr.common_reservaciones.clients.HuespedClient;
@@ -16,10 +18,11 @@ import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.reservaciones.dtos.ReservacionRequest;
 import com.vdr.reservaciones.dtos.ReservacionResponse;
 import com.vdr.reservaciones.entities.Reservacion;
+import com.vdr.reservaciones.enums.EstadoReserva;
 import com.vdr.reservaciones.mapper.ReservacionMapper;
 import com.vdr.reservaciones.repositories.ReservacionRepository;
 
-import jakarta.transaction.Transactional;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +37,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 	private final HabitacionClient habitacionClient;
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<ReservacionResponse> listar() {
 		log.info("Listando reservaciones activas");
 		return reservacionRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO).stream()
@@ -44,12 +48,19 @@ public class ReservacionServiceImpl implements ReservacionService{
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public ReservacionResponse obtenerPorId(Long id) {
 		log.info("Obteniendo reservación con id: {}", id);
-		return reservacionMapper.entityToResponse(getReservacionOrThrow(id));
+		Reservacion reservacion = getReservacionOrThrow(id);
+		
+		return reservacionMapper.entityToResponse(reservacion,
+				getHuespedResponse(reservacion.getIdHuesped()),
+				getHabitacionResponse(reservacion.getIdHabitacion()));
 	}
+	
 
 	@Override
+	
 	public ReservacionResponse registrar(ReservacionRequest request) {
 		log.info("Registrando nueva reservación");
 
@@ -68,7 +79,22 @@ public class ReservacionServiceImpl implements ReservacionService{
 
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
-	        return reservacionMapper.entityToResponse(reservacion);
+	        return reservacionMapper.entityToResponse(reservacion,
+	        		getHuespedResponse(reservacion.getIdHuesped()),
+	        		getHabitacionResponse(reservacion.getIdHabitacion()));
+	}
+	
+	@Override
+	public ReservacionResponse actualizarEstadoReserva(Long idReserva, Long idEstadoReserva) {
+		Reservacion reserva = getReservacionOrThrow(idReserva);
+		EstadoReserva estado = EstadoReserva.fromCodigo(idEstadoReserva);
+		
+		reserva.setEstadoReserva(estado);
+		
+		
+		return reservacionMapper.entityToResponse(reserva,
+				getHuespedResponse(reserva.getIdHuesped()),
+				getHabitacionResponse(reserva.getIdHabitacion()));
 	}
 
 	@Override
@@ -100,5 +126,6 @@ public class ReservacionServiceImpl implements ReservacionService{
 	private HuespedResponse getHuespedResponse(Long id) {
 		return huespedClient.obtenerHuespedPorId(id);
 	}
+	
 
 }
