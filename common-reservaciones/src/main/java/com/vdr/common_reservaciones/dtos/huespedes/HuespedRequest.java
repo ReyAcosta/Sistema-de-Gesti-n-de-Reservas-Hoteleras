@@ -2,7 +2,9 @@ package com.vdr.common_reservaciones.dtos.huespedes;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record HuespedRequest(
@@ -31,7 +33,8 @@ public record HuespedRequest(
 	    @Size(min = 12, max = 12, message = "El documento debe de tener minimos 12 caracteres" )
 	    String documento,
 
-	    @NotBlank(message = "La nacionalidad es requerida")
-	    String nacionalidad
+	    @NotNull(message = "El id de la nacionalidad es requerida")
+	    @Positive(message = "El id de la nacionalidad debe ser positivo")
+	    Long idNacionalidad
 
 	) {}
