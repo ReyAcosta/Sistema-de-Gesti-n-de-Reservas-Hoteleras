@@ -5,10 +5,12 @@ import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
+import com.vdr.common_reservaciones.clients.ReservaClient;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedRequest;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.common_reservaciones.enums.TipoDocumento;
+import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
 import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
 import com.vdr.huespedes.entities.Huesped;
 import com.vdr.huespedes.mappers.HuespedMapper;
@@ -25,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HuespedServiceImpl implements HuespedService {
 	private final HuespedRepository huespedRepository;
 	private final HuespedMapper huespedMapper;
+	private final ReservaClient reservaClient;
 	
 	@Override
 	public List<HuespedResponse> listar() {
@@ -70,10 +73,21 @@ public class HuespedServiceImpl implements HuespedService {
 	
 	@Override
 	public void eliminar(Long id) {
+		log.info("Intentando eliminar huésped con id: {}", id);
 		Huesped huesped = getHuespedOrThrow(id);
 		
+		boolean tieneReservas = reservaClient.huespedTieneReservasActivas(id);
+
+		if (tieneReservas) {
+		    throw new EntidadRelacionadaException(
+		        "No se puede eliminar el huésped porque tiene reservas activas"
+		    );
+		}
+			
+		 huesped.setEstadoRegistro(EstadoRegistro.ELIMINADO);
+		 
 		log.info("Eliminando Huesped con id: {} ", id);
-	    huesped.setEstadoRegistro(EstadoRegistro.ELIMINADO);	
+	   	
 		
 	}
 	
