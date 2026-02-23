@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedRequest;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
+import com.vdr.common_reservaciones.enums.TipoDocumento;
 import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
 import com.vdr.huespedes.entities.Huesped;
 import com.vdr.huespedes.mappers.HuespedMapper;
@@ -59,7 +60,7 @@ public class HuespedServiceImpl implements HuespedService {
 	        
 	        verificarEmailUnicoActualizar(id, huesped.getEmail());
 	        verificarTelefonoUnicoActualizar(id, huesped.getTelefono());
-	        verificarDocumentoUnicoActualizar(id, huesped.getDocumento());
+	        verificarTipoDocumentoUnicoActualizar(id, huesped.getTipoDocumento());
 	        
 	        huespedMapper.updateEntityFromRequest(request, huesped);
 
@@ -106,16 +107,16 @@ public class HuespedServiceImpl implements HuespedService {
 		}
 	}
 	
-	private void verificarDocumentoUnico(String documento) {
-		if(huespedRepository.existsByDocumentoIgnoreCaseAndEstadoRegistro(documento, EstadoRegistro.ACTIVO)) {
-			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + documento);
+	private void verificarDocumentoUnico(TipoDocumento tipoDocumento) {
+		if(huespedRepository.existsByTipoDocumentoIgnoreCaseAndEstadoRegistro(tipoDocumento, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
 		}
 	}
 	
 	private void validarDatosUnicos(HuespedRequest request) {
 		verificarEmailUnico(request.email());
 		verificarTelefonoUnico(request.telefono());
-		verificarDocumentoUnico(request.documento());
+	//	verificarDocumentoUnico(request.idDocumento());
 	}
 	
 	/*---------verificar datos unicos al actualizar---------------*/
@@ -132,9 +133,9 @@ public class HuespedServiceImpl implements HuespedService {
 		}
 	}
 	
-	private void verificarDocumentoUnicoActualizar(Long id, String documento) {
-		if(huespedRepository.existsByDocumentoIgnoreCaseAndIdNotAndEstadoRegistro(documento, id, EstadoRegistro.ACTIVO)) {
-			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + documento);
+	private void verificarTipoDocumentoUnicoActualizar(Long id, TipoDocumento tipoDocumento) {
+		if(huespedRepository.existsByTipoDocumentoIgnoreCaseAndIdNotAndEstadoRegistro(tipoDocumento, id, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
 		}
 	}
 }
