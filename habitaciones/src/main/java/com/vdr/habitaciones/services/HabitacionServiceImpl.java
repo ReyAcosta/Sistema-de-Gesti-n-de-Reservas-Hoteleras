@@ -67,19 +67,19 @@ public class HabitacionServiceImpl implements HabitacionService{
 		
 		habitacionMapper.updateEntityFromRequest(request, habitacion);
 		
-		
+		habitacionRepository.save(habitacion);
 		return habitacionMapper.entityToResponse(habitacion);
 	}
 	
 	@Override
 	public HabitacionResponse actualizarEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion) {
-		Habitacion habitacion = getHabitacionOrThrow(idEstadoHabitacion);
+		Habitacion habitacion = getHabitacionOrThrow(idHabitacion);
 		EstadoHabitacion estado = EstadoHabitacion.fromCodigo(idEstadoHabitacion); 
 		
 		validarEstadoHabitacion(idHabitacion);
 		
 		habitacion.setEstadoHabitacion(estado);
-		
+		habitacionRepository.save(habitacion);
 		return habitacionMapper.entityToResponse(habitacion);
 	}
 
@@ -126,6 +126,7 @@ public class HabitacionServiceImpl implements HabitacionService{
 		/*--------------------metodos publicos ----------------------------------*/
 		public void validarEstadoHabitacion(Long id) {
 			Habitacion habitacion = getHabitacionOrThrow(id);
+			
  			if(!habitacion.getEstadoHabitacion().equals(EstadoHabitacion.DISPONIBLE)) {
  				
  				throw new ReglaDeNegocioInvalidaException("no se puede cambiar el estado de la habitacion si esta ocupada o en uso");
