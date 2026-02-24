@@ -36,7 +36,7 @@ public class HabitacionMapper implements CommonMapper<HabitacionRequest, Habitac
 				.tipoHabitacion(TipoHabitacion.fromCodigo(request.idTipoHabitacion()))
 				.precio(request.precio())
 				.capacidad(request.capacidad())
-				.estadoHabitacion(EstadoHabitacion.fromCodigo(request.idEstadoHabitacion()))
+				.estadoHabitacion(EstadoHabitacion.DISPONIBLE)
 				.estadoRegistro(EstadoRegistro.ACTIVO)
 				.build();
 	}
@@ -48,8 +48,17 @@ public class HabitacionMapper implements CommonMapper<HabitacionRequest, Habitac
 		entity.setTipoHabitacion(TipoHabitacion.fromCodigo(request.idTipoHabitacion()));
 		entity.setPrecio(request.precio());
 		entity.setCapacidad(request.capacidad());
-		entity.setEstadoHabitacion(EstadoHabitacion.fromCodigo(request.idEstadoHabitacion()));
+		//entity.setEstadoHabitacion(EstadoHabitacion.DISPONIBLE);
 		return entity;
 	}
+	
+	public Habitacion updateEntityFromRequest(HabitacionRequest request, Habitacion entity, Long idEstadoHabitacion) {
+		if(entity == null || request == null) return null;
+		//entity
+		updateEntityFromRequest(request, entity);
+		entity.setEstadoHabitacion(EstadoHabitacion.fromCodigo(idEstadoHabitacion));
+		return entity;
+	}
+	
 
 }
