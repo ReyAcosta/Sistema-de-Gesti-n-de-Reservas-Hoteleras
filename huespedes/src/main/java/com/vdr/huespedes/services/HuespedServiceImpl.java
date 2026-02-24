@@ -74,20 +74,15 @@ public class HuespedServiceImpl implements HuespedService {
 	@Override
 	public void eliminar(Long id) {
 		log.info("Intentando eliminar huésped con id: {}", id);
-		Huesped huesped = getHuespedOrThrow(id);
-		
-		boolean tieneReservas = reservaClient.huespedTieneReservasActivas(id);
-
-		if (tieneReservas) {
-		    throw new EntidadRelacionadaException(
-		        "No se puede eliminar el huésped porque tiene reservas activas"
-		    );
-		}
+		 Huesped huesped = getHuespedOrThrow(id);
+		 reservaClient.huespedTieneReservasActivas(id);
 			
-		 huesped.setEstadoRegistro(EstadoRegistro.ELIMINADO);
-		 
-		log.info("Eliminando Huesped con id: {} ", id);
-	   	
+			log.info("Eliminando paciente con id {}", id);
+	        
+
+	        huesped.setEstadoRegistro(EstadoRegistro.ELIMINADO);
+	        log.info("Eliminando paciente con id {}", id);
+			
 		
 	}
 	
@@ -152,4 +147,5 @@ public class HuespedServiceImpl implements HuespedService {
 			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
 		}
 	}
+	
 }

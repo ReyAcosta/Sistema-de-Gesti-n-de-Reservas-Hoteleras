@@ -11,11 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vdr.common_reservaciones.clients.HabitacionClient;
 import com.vdr.common_reservaciones.clients.HuespedClient;
-import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionRequest;
+
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
+
 import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
+
+import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
+
 import com.vdr.reservaciones.dtos.ReservacionRequest;
 import com.vdr.reservaciones.dtos.ReservacionResponse;
 import com.vdr.reservaciones.entities.Reservacion;
@@ -113,6 +117,18 @@ public class ReservacionServiceImpl implements ReservacionService{
         reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 	}
 	
+	@Override
+	public void huespedTieneConsultasConfirmadasEnCurso(Long idHuesped) {
+		log.info("Validando reservaciones activas para el huesped id: {}", idHuesped);
+		
+		boolean tieneCitasActivas = reservacionRepository.existsByIdHuespedAndEstadoRegistroAndEstadoReserva(
+				idHuesped, EstadoRegistro.ACTIVO, EstadoReserva.EN_CURSO);
+		if(tieneCitasActivas) {
+			throw new EntidadRelacionadaException("No se puede modificar el huesped porque tiene reservaciones." + EstadoReserva.EN_CURSO);
+		}
+				
+	}
+	
 	/*-------------------Comienzan metodos privados-----------*/
 	
 	private Reservacion getReservacionOrThrow(Long id) {
@@ -134,6 +150,9 @@ public class ReservacionServiceImpl implements ReservacionService{
 	private HuespedResponse getHuespedResponse(Long id) {
 		return huespedClient.obtenerHuespedPorId(id);
 	}
+
+
+ 
 	
 	private HabitacionResponse verificarHabitacionDisponible(Long idHabitacion) {
 		HabitacionResponse habitacion= getHabitacionResponse(idHabitacion);
