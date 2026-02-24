@@ -59,7 +59,7 @@ public class Huesped {
     private String telefono;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TIPO_DOCUMENTO", length = 30, nullable = false)
+    @Column(name = "DOCUMENTO", length = 30, nullable = false)
     private TipoDocumento tipoDocumento;
 
     @Enumerated(EnumType.STRING)

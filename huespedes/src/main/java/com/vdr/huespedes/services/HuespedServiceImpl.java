@@ -74,20 +74,15 @@ public class HuespedServiceImpl implements HuespedService {
 	@Override
 	public void eliminar(Long id) {
 		log.info("Intentando eliminar huésped con id: {}", id);
-		Huesped huesped = getHuespedOrThrow(id);
-		
-		boolean tieneReservas = reservaClient.huespedTieneReservasActivas(id);
-
-		if (tieneReservas) {
-		    throw new EntidadRelacionadaException(
-		        "No se puede eliminar el huésped porque tiene reservas activas"
-		    );
-		}
+		 Huesped huesped = getHuespedOrThrow(id);
+		 reservaClient.huespedTieneReservasActivas(id);
 			
-		 huesped.setEstadoRegistro(EstadoRegistro.ELIMINADO);
-		 
-		log.info("Eliminando Huesped con id: {} ", id);
-	   	
+			log.info("Eliminando paciente con id {}", id);
+	        
+
+	        huesped.setEstadoRegistro(EstadoRegistro.ELIMINADO);
+	        log.info("Eliminando paciente con id {}", id);
+			
 		
 	}
 	
@@ -122,7 +117,7 @@ public class HuespedServiceImpl implements HuespedService {
 	}
 	
 	private void verificarDocumentoUnico(TipoDocumento tipoDocumento) {
-		if(huespedRepository.existsByTipoDocumentoIgnoreCaseAndEstadoRegistro(tipoDocumento, EstadoRegistro.ACTIVO)) {
+		if(huespedRepository.existsByTipoDocumentoAndEstadoRegistro(tipoDocumento, EstadoRegistro.ACTIVO)) {
 			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
 		}
 	}
@@ -148,8 +143,9 @@ public class HuespedServiceImpl implements HuespedService {
 	}
 	
 	private void verificarTipoDocumentoUnicoActualizar(Long id, TipoDocumento tipoDocumento) {
-		if(huespedRepository.existsByTipoDocumentoIgnoreCaseAndIdNotAndEstadoRegistro(tipoDocumento, id, EstadoRegistro.ACTIVO)) {
+		if(huespedRepository.existsByTipoDocumentoAndIdNotAndEstadoRegistro(tipoDocumento, id, EstadoRegistro.ACTIVO)) {
 			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
 		}
 	}
+	
 }
