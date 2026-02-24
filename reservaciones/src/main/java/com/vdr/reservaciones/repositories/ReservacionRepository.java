@@ -16,4 +16,6 @@ public interface ReservacionRepository extends JpaRepository<Reservacion, Long> 
 	
 	Optional<Reservacion> findByIdAndEstadoRegistro(Long id, EstadoRegistro estadoResgistro);
 	
+	boolean existsByIdHuespedAndEstadoRegistroAndEstadoReserva(Long idHuesped, EstadoRegistro estadoRegistro, EstadoReserva estadoReserva);
+	
 }

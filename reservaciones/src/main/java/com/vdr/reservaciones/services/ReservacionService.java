@@ -7,4 +7,7 @@ import com.vdr.reservaciones.dtos.ReservacionResponse;
 public interface ReservacionService extends CrudService<ReservacionRequest, ReservacionResponse>{
 	
 	ReservacionResponse actualizarEstadoReserva(Long idReserva, Long idEstadoReserva);
+	
+	void huespedTieneConsultasConfirmadasEnCurso(Long idHuesped);
+	
 }
