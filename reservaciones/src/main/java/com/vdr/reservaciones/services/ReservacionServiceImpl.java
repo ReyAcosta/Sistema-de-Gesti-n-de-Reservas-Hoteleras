@@ -1,5 +1,6 @@
 package com.vdr.reservaciones.services;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -14,7 +15,11 @@ import com.vdr.common_reservaciones.clients.HuespedClient;
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
+
+import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
+
 import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
+
 import com.vdr.reservaciones.dtos.ReservacionRequest;
 import com.vdr.reservaciones.dtos.ReservacionResponse;
 import com.vdr.reservaciones.entities.Reservacion;
@@ -63,6 +68,9 @@ public class ReservacionServiceImpl implements ReservacionService{
 	
 	public ReservacionResponse registrar(ReservacionRequest request) {
 		log.info("Registrando nueva reservación");
+		HuespedResponse huesped =getHuespedResponse(request.idHuesped());
+		HabitacionResponse habitacion =verificarHabitacionDisponible(request.idHabitacion());
+		
 
         Reservacion reservacion = reservacionMapper.requestToEntity(request);
         Long EstadoHabitacion = (long) 2;
@@ -71,9 +79,8 @@ public class ReservacionServiceImpl implements ReservacionService{
         
         Reservacion guardada = reservacionRepository.save(reservacion);
         
-        //habitacionClient.actualizarEstadoHabitacion(request.idHabitacion(), EstadoHabitacion);
-        
-        return reservacionMapper.entityToResponse(guardada, getHuespedResponse(request.idHuesped()),getHabitacionResponse(request.idHabitacion()));
+
+        return reservacionMapper.entityToResponse(guardada, huesped, habitacion);
 	}
 
 	@Override
@@ -81,6 +88,9 @@ public class ReservacionServiceImpl implements ReservacionService{
 		 log.info("Actualizando reservación con id: {}", id);
 
 	        Reservacion reservacion = getReservacionOrThrow(id);
+	        
+	        verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
+	        verificarCambiosEstadoReserva(request, reservacion);
 
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
@@ -93,6 +103,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 	public ReservacionResponse actualizarEstadoReserva(Long idReserva, Long idEstadoReserva) {
 		Reservacion reserva = getReservacionOrThrow(idReserva);
 		EstadoReserva estado = EstadoReserva.fromCodigo(idEstadoReserva);
+		
 		
 		reserva.setEstadoReserva(estado);
 		
@@ -147,5 +158,51 @@ public class ReservacionServiceImpl implements ReservacionService{
 
  
 	
+	private HabitacionResponse verificarHabitacionDisponible(Long idHabitacion) {
+		HabitacionResponse habitacion= getHabitacionResponse(idHabitacion);
+		return habitacion;
+	}
+	
+	private void actualizarEstadoHabitacionEnregistro() {}
+	
+	
+	private void verificarCambiosEstadoReserva(ReservacionRequest request, Reservacion reservacion) {
+		verificarFechaInicioFechaFin(request.fechaInicio(), request.fechaFin());
+		
+		
+		
+		if(reservacion.getEstadoReserva().equals(EstadoReserva.FINALIZADA) ||
+				reservacion.getEstadoReserva().equals(EstadoReserva.CANCELADA)) {
+			throw new ReglaDeNegocioInvalidaException("No se puede modificar la la reservacion porque ya se encuentra en"
+					+ "finalizada o cancelada");}
+		
+		if(!reservacion.getFechaFin().equals(request.fechaFin()) &&(
+				!reservacion.getEstadoReserva().equals(EstadoReserva.CONFIRMADA) &&
+				!reservacion.getEstadoReserva().equals(EstadoReserva.EN_CURSO)) ) {
+				throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha salida  porque"
+						+ "ya no esta en estado confirmada o en curso");
+			}
+		
+		if(!reservacion.getFechaInicio().equals(request.fechaInicio()) &&
+				!reservacion.getEstadoReserva().equals(EstadoReserva.CONFIRMADA)) {
+			throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha de salida  porque"
+					+ "ya no esta en estado confirmada");}
+		
+		
+		
+	}
+	
+	private void verificarCambiosHuespedHabitacionEnReserva(ReservacionRequest request, Reservacion reservacion) {
+		if(!reservacion.getIdHuesped().equals(request.idHuesped()) ||
+				!reservacion.getIdHuesped().equals(request.idHuesped())) {
+			throw new IllegalArgumentException("No se puede modificar el usuario y habitacion");
+		}
+	}
+	
+	private void verificarFechaInicioFechaFin(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+		if(fechaInicio.isAfter(fechaFin)) {
+			throw new IllegalArgumentException("La fecha de inicio no puede ser despue de la de fin");
+		}
+	}
 
 }

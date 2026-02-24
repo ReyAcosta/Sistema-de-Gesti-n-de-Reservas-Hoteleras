@@ -23,9 +23,6 @@ public record ReservacionRequest(
 	    
 	    @NotNull(message = "La fecha de reserva es obligatoria")
 	    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
-	    LocalDateTime fechaFin,
+	    LocalDateTime fechaFin
 	    
-	    @NotNull(message = "La habitación es obligatoria")
-	    @Positive(message = "El id de la habitacion debe de ser positivo")
-	    Long idEstadoReserva
 	) {}
