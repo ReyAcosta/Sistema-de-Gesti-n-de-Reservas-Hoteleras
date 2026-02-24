@@ -65,9 +65,14 @@ public class ReservacionServiceImpl implements ReservacionService{
 		log.info("Registrando nueva reservación");
 
         Reservacion reservacion = reservacionMapper.requestToEntity(request);
+        Long EstadoHabitacion = (long) 2;
 
+        habitacionClient.validarEstadoHabitacion(request.idHabitacion());
+        
         Reservacion guardada = reservacionRepository.save(reservacion);
-
+        
+        //habitacionClient.actualizarEstadoHabitacion(request.idHabitacion(), EstadoHabitacion);
+        
         return reservacionMapper.entityToResponse(guardada, getHuespedResponse(request.idHuesped()),getHabitacionResponse(request.idHabitacion()));
 	}
 

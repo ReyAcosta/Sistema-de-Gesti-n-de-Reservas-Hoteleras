@@ -32,7 +32,7 @@ public class HabitacionController extends CommonController<HabitacionRequest, Ha
 		return ResponseEntity.ok(service.actualizarEstadoHabitacion(id, idEstado));
 	}
 	
-	@GetMapping("/{id}/")
+	@GetMapping("/{id}/validaEstado")
 	public void validarEstadoHabitacion(@PathVariable Long id) {
 		service.validarEstadoHabitacion(id);
 	}
