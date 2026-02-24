@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
+import com.vdr.common_reservaciones.enums.TipoDocumento;
 import com.vdr.huespedes.entities.Huesped;
 
 @Repository
@@ -23,8 +24,8 @@ public interface HuespedRepository extends JpaRepository<Huesped, Long>{
 	
 	Boolean existsByTelefonoAndIdNotAndEstadoRegistro(String telefono,Long id,EstadoRegistro estadoRegistro);
 	
-	Boolean existsByDocumentoIgnoreCaseAndEstadoRegistro(String documento, EstadoRegistro estadoRegistro);
+	Boolean existsByTipoDocumentoIgnoreCaseAndEstadoRegistro(TipoDocumento tipoDocumento, EstadoRegistro estadoRegistro);
 	
-	Boolean existsByDocumentoIgnoreCaseAndIdNotAndEstadoRegistro(String documento,Long id, EstadoRegistro estadoRegistro);
+	Boolean existsByTipoDocumentoIgnoreCaseAndIdNotAndEstadoRegistro(TipoDocumento tipoDocumento,Long id, EstadoRegistro estadoRegistro);
 
 }

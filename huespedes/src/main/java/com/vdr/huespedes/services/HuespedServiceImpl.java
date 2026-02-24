@@ -5,9 +5,12 @@ import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
+import com.vdr.common_reservaciones.clients.ReservaClient;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedRequest;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
+import com.vdr.common_reservaciones.enums.TipoDocumento;
+import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
 import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
 import com.vdr.huespedes.entities.Huesped;
 import com.vdr.huespedes.mappers.HuespedMapper;
@@ -24,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HuespedServiceImpl implements HuespedService {
 	private final HuespedRepository huespedRepository;
 	private final HuespedMapper huespedMapper;
+	private final ReservaClient reservaClient;
 	
 	@Override
 	public List<HuespedResponse> listar() {
@@ -59,7 +63,7 @@ public class HuespedServiceImpl implements HuespedService {
 	        
 	        verificarEmailUnicoActualizar(id, huesped.getEmail());
 	        verificarTelefonoUnicoActualizar(id, huesped.getTelefono());
-	        verificarDocumentoUnicoActualizar(id, huesped.getDocumento());
+	        verificarTipoDocumentoUnicoActualizar(id, huesped.getTipoDocumento());
 	        
 	        huespedMapper.updateEntityFromRequest(request, huesped);
 
@@ -69,10 +73,21 @@ public class HuespedServiceImpl implements HuespedService {
 	
 	@Override
 	public void eliminar(Long id) {
+		log.info("Intentando eliminar huésped con id: {}", id);
 		Huesped huesped = getHuespedOrThrow(id);
 		
+		boolean tieneReservas = reservaClient.huespedTieneReservasActivas(id);
+
+		if (tieneReservas) {
+		    throw new EntidadRelacionadaException(
+		        "No se puede eliminar el huésped porque tiene reservas activas"
+		    );
+		}
+			
+		 huesped.setEstadoRegistro(EstadoRegistro.ELIMINADO);
+		 
 		log.info("Eliminando Huesped con id: {} ", id);
-	    huesped.setEstadoRegistro(EstadoRegistro.ELIMINADO);	
+	   	
 		
 	}
 	
@@ -106,16 +121,16 @@ public class HuespedServiceImpl implements HuespedService {
 		}
 	}
 	
-	private void verificarDocumentoUnico(String documento) {
-		if(huespedRepository.existsByDocumentoIgnoreCaseAndEstadoRegistro(documento, EstadoRegistro.ACTIVO)) {
-			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + documento);
+	private void verificarDocumentoUnico(TipoDocumento tipoDocumento) {
+		if(huespedRepository.existsByTipoDocumentoIgnoreCaseAndEstadoRegistro(tipoDocumento, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
 		}
 	}
 	
 	private void validarDatosUnicos(HuespedRequest request) {
 		verificarEmailUnico(request.email());
 		verificarTelefonoUnico(request.telefono());
-		verificarDocumentoUnico(request.documento());
+	//	verificarDocumentoUnico(request.idDocumento());
 	}
 	
 	/*---------verificar datos unicos al actualizar---------------*/
@@ -132,9 +147,9 @@ public class HuespedServiceImpl implements HuespedService {
 		}
 	}
 	
-	private void verificarDocumentoUnicoActualizar(Long id, String documento) {
-		if(huespedRepository.existsByDocumentoIgnoreCaseAndIdNotAndEstadoRegistro(documento, id, EstadoRegistro.ACTIVO)) {
-			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + documento);
+	private void verificarTipoDocumentoUnicoActualizar(Long id, TipoDocumento tipoDocumento) {
+		if(huespedRepository.existsByTipoDocumentoIgnoreCaseAndIdNotAndEstadoRegistro(tipoDocumento, id, EstadoRegistro.ACTIVO)) {
+			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
 		}
 	}
 }
