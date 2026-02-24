@@ -146,24 +146,26 @@ public class ReservacionServiceImpl implements ReservacionService{
 	private void verificarCambiosEstadoReserva(ReservacionRequest request, Reservacion reservacion) {
 		verificarFechaInicioFechaFin(request.fechaInicio(), request.fechaFin());
 		
+		
+		
 		if(reservacion.getEstadoReserva().equals(EstadoReserva.FINALIZADA) ||
 				reservacion.getEstadoReserva().equals(EstadoReserva.CANCELADA)) {
-			throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha de salida  porque"
-					+ "ya no esta en estado confirmada");
-		}
+			throw new ReglaDeNegocioInvalidaException("No se puede modificar la la reservacion porque ya se encuentra en"
+					+ "finalizada o cancelada");}
+		
+		if(!reservacion.getFechaFin().equals(request.fechaFin()) &&(
+				!reservacion.getEstadoReserva().equals(EstadoReserva.CONFIRMADA) &&
+				!reservacion.getEstadoReserva().equals(EstadoReserva.EN_CURSO)) ) {
+				throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha salida  porque"
+						+ "ya no esta en estado confirmada o en curso");
+			}
 		
 		if(!reservacion.getFechaInicio().equals(request.fechaInicio()) &&
 				!reservacion.getEstadoReserva().equals(EstadoReserva.CONFIRMADA)) {
 			throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha de salida  porque"
-					+ "ya no esta en estado confirmada");
-		}
+					+ "ya no esta en estado confirmada");}
 		
-		if(!reservacion.getFechaFin().equals(request.fechaFin()) &&(
-			!reservacion.getEstadoReserva().equals(EstadoReserva.CONFIRMADA) &&
-			!reservacion.getEstadoReserva().equals(EstadoReserva.EN_CURSO)) ) {
-			throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha salida  porque"
-					+ "ya no esta en estado confirmada o en curso");
-		}
+		
 		
 	}
 	

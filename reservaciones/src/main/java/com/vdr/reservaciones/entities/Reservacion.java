@@ -15,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,10 +47,10 @@ public class Reservacion{
 	    @CreationTimestamp
 	    private LocalDateTime fechaReserva;
 	    
-	    @Column(name = "FECHA_INICIO", updatable = false, insertable = false)  
+	    @Column(name = "FECHA_INICIO") 
 	    private LocalDateTime fechaInicio;
 	    
-	    @Column(name = "FECHA_FIN", updatable = false, insertable = false)
+	    @Column(name = "FECHA_FIN")
 	    private LocalDateTime fechaFin;
 
 	

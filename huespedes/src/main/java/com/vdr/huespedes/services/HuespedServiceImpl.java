@@ -122,7 +122,7 @@ public class HuespedServiceImpl implements HuespedService {
 	}
 	
 	private void verificarDocumentoUnico(TipoDocumento tipoDocumento) {
-		if(huespedRepository.existsByTipoDocumentoIgnoreCaseAndEstadoRegistro(tipoDocumento, EstadoRegistro.ACTIVO)) {
+		if(huespedRepository.existsByTipoDocumentoAndEstadoRegistro(tipoDocumento, EstadoRegistro.ACTIVO)) {
 			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
 		}
 	}
@@ -148,7 +148,7 @@ public class HuespedServiceImpl implements HuespedService {
 	}
 	
 	private void verificarTipoDocumentoUnicoActualizar(Long id, TipoDocumento tipoDocumento) {
-		if(huespedRepository.existsByTipoDocumentoIgnoreCaseAndIdNotAndEstadoRegistro(tipoDocumento, id, EstadoRegistro.ACTIVO)) {
+		if(huespedRepository.existsByTipoDocumentoAndIdNotAndEstadoRegistro(tipoDocumento, id, EstadoRegistro.ACTIVO)) {
 			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
 		}
 	}
