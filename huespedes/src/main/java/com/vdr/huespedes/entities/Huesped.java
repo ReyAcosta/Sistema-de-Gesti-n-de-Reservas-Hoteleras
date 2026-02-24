@@ -1,6 +1,7 @@
 package com.vdr.huespedes.entities;
 
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
+import com.vdr.common_reservaciones.enums.TipoDocumento;
 import com.vdr.common_reservaciones.enums.Nacionalidad;
 
 import jakarta.persistence.Column;
@@ -57,9 +58,9 @@ public class Huesped {
     @Column(name = "TELEFONO", length = 10, nullable = false)
     private String telefono;
 
-    @NotBlank
-    @Column(name = "DOCUMENTO", length = 30, nullable = false)
-    private String documento;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TIPO_DOCUMENTO", length = 30, nullable = false)
+    private TipoDocumento tipoDocumento;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "NACIONALIDAD", length = 50, nullable = false)
