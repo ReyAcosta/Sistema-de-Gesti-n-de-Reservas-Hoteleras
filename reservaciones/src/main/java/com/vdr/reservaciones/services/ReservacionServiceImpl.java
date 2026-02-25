@@ -87,9 +87,9 @@ public class ReservacionServiceImpl implements ReservacionService{
 
 	        Reservacion reservacion = getReservacionOrThrow(id);
 	        
-	        verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
 	        verificarCambiosEstadoReserva(request, reservacion);
-
+	        verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
+	        
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
 	        return reservacionMapper.entityToResponse(reservacion,
@@ -102,6 +102,8 @@ public class ReservacionServiceImpl implements ReservacionService{
 		Reservacion reserva = getReservacionOrThrow(idReserva);
 		EstadoReserva estado = EstadoReserva.fromCodigo(idEstadoReserva);
 		verificarEstadoReserva(reserva.getEstadoReserva(), estado);
+		
+		
 		cambiarEstadoConformeReserva(estado, reserva.getIdHabitacion());
 		
 		reserva.setEstadoReserva(estado);
@@ -187,7 +189,12 @@ public class ReservacionServiceImpl implements ReservacionService{
 		if(!reservacion.getIdHuesped().equals(request.idHuesped())) {
 			throw new IllegalArgumentException("No se puede modificar el usuario");
 		}
-			
+		
+		if(!reservacion.getIdHabitacion().equals(request.idHabitacion()) && 
+				reservacion.getEstadoReserva().equals(EstadoReserva.EN_CURSO)) {
+			throw new ReglaDeNegocioInvalidaException("No se puede cambiar de habitacion con la reserva en curso");
+		}
+		
 			if(!reservacion.getIdHabitacion().equals(request.idHabitacion())) {
 				habitacionClient.validarEstadoHabitacion(request.idHabitacion());
 				habitacionClient.cambioHabitacion(reservacion.getIdHabitacion(),request.idHabitacion());
@@ -238,5 +245,6 @@ public class ReservacionServiceImpl implements ReservacionService{
 			cambioEstadoHabitacion(idHabitacion, 1L);
 		}
 	}
+	
 
 }
