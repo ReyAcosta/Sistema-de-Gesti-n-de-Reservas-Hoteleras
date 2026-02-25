@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 
@@ -15,9 +16,14 @@ public interface HabitacionClient {
 	HabitacionResponse obtenerHabitacionPorId(@PathVariable Long id);
 
 	@GetMapping("/{id}/validaEstado")
-	public void validarEstadoHabitacion(@PathVariable Long id) ;
+	Void validarEstadoHabitacion(@PathVariable Long id) ;
 	
-	@PatchMapping("/{id}/estado/{idEstado}")
-	public ResponseEntity<HabitacionResponse> actualizarEstadoHabitacion(@PathVariable Long id,@PathVariable Long idEstado);
-
+	@PutMapping("/{id}/estado/{idEstado}")
+	HabitacionResponse actualizarEstadoHabitacionSinRestriccion(@PathVariable Long id,
+			@PathVariable Long idEstado);
+	
+	@PutMapping("/{idHabitacionActual}/cambio/{idHabitacionNueva}")
+	Void cambioHabitacion(@PathVariable Long idHabitacionActual,
+												@PathVariable Long idHabitacionNueva);
+	
 }

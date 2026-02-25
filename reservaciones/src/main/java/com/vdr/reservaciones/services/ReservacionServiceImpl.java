@@ -1,9 +1,9 @@
 package com.vdr.reservaciones.services;
 
 import java.time.LocalDateTime;
+
 import java.util.List;
-
-
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
@@ -69,15 +69,13 @@ public class ReservacionServiceImpl implements ReservacionService{
 	public ReservacionResponse registrar(ReservacionRequest request) {
 		log.info("Registrando nueva reservación");
 		HuespedResponse huesped =getHuespedResponse(request.idHuesped());
-		HabitacionResponse habitacion =verificarHabitacionDisponible(request.idHabitacion());
+		habitacionClient.validarEstadoHabitacion(request.idHabitacion());
+		HabitacionResponse habitacion = habitacionClient.obtenerHabitacionPorId(request.idHabitacion());
 		
-
         Reservacion reservacion = reservacionMapper.requestToEntity(request);
-        Long EstadoHabitacion = (long) 2;
-
-        habitacionClient.validarEstadoHabitacion(request.idHabitacion());
-        
         Reservacion guardada = reservacionRepository.save(reservacion);
+        
+        habitacionClient.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 2L);
         
 
         return reservacionMapper.entityToResponse(guardada, huesped, habitacion);
@@ -103,10 +101,10 @@ public class ReservacionServiceImpl implements ReservacionService{
 	public ReservacionResponse actualizarEstadoReserva(Long idReserva, Long idEstadoReserva) {
 		Reservacion reserva = getReservacionOrThrow(idReserva);
 		EstadoReserva estado = EstadoReserva.fromCodigo(idEstadoReserva);
-		
+		verificarEstadoReserva(reserva.getEstadoReserva(), estado);
+		cambiarEstadoConformeReserva(estado, reserva.getIdHabitacion());
 		
 		reserva.setEstadoReserva(estado);
-		
 		
 		return reservacionMapper.entityToResponse(reserva,
 				getHuespedResponse(reserva.getIdHuesped()),
@@ -155,15 +153,8 @@ public class ReservacionServiceImpl implements ReservacionService{
 		return huespedClient.obtenerHuespedPorId(id);
 	}
 
-
- 
 	
-	private HabitacionResponse verificarHabitacionDisponible(Long idHabitacion) {
-		HabitacionResponse habitacion= getHabitacionResponse(idHabitacion);
-		return habitacion;
-	}
 	
-	private void actualizarEstadoHabitacionEnregistro() {}
 	
 	
 	private void verificarCambiosEstadoReserva(ReservacionRequest request, Reservacion reservacion) {
@@ -193,15 +184,58 @@ public class ReservacionServiceImpl implements ReservacionService{
 	}
 	
 	private void verificarCambiosHuespedHabitacionEnReserva(ReservacionRequest request, Reservacion reservacion) {
-		if(!reservacion.getIdHuesped().equals(request.idHuesped()) ||
-				!reservacion.getIdHuesped().equals(request.idHuesped())) {
-			throw new IllegalArgumentException("No se puede modificar el usuario y habitacion");
+		if(!reservacion.getIdHuesped().equals(request.idHuesped())) {
+			throw new IllegalArgumentException("No se puede modificar el usuario");
 		}
+			
+			if(!reservacion.getIdHabitacion().equals(request.idHabitacion())) {
+				habitacionClient.validarEstadoHabitacion(request.idHabitacion());
+				habitacionClient.cambioHabitacion(reservacion.getIdHabitacion(),request.idHabitacion());
+			}
+		
 	}
 	
 	private void verificarFechaInicioFechaFin(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
 		if(fechaInicio.isAfter(fechaFin)) {
 			throw new IllegalArgumentException("La fecha de inicio no puede ser despue de la de fin");
+		}
+	}
+	
+	static final Map<EstadoReserva, List<EstadoReserva>> cambiosDisponibles = Map.of(
+			EstadoReserva.CONFIRMADA, List.of(EstadoReserva.EN_CURSO, EstadoReserva.CANCELADA),
+			EstadoReserva.EN_CURSO, List.of(EstadoReserva.FINALIZADA)
+	);
+	
+	private void verificarEstadoReserva(EstadoReserva estadoActual, EstadoReserva estadoNuevo) {
+		log.info("estado actual: {}, estado nuevo: {}", estadoActual, estadoNuevo);
+		
+		log.info("Clase estadoActual: {}", estadoActual.getClass().getName());
+		log.info("Clase enum del map: {}", EstadoReserva.EN_CURSO.getClass().getName());
+		
+		if(estadoActual.equals(estadoNuevo)) {
+			throw new ReglaDeNegocioInvalidaException("La reservacion ya se encuentra en estado " + estadoNuevo);
+		}
+		
+		if(estadoActual.equals(EstadoReserva.FINALIZADA)|| estadoActual.equals(EstadoReserva.CANCELADA)){
+			throw new ReglaDeNegocioInvalidaException("Cambio no permitido");
+		}
+		
+		List<EstadoReserva> cambiosDis = cambiosDisponibles.getOrDefault(estadoActual, List.of());
+		
+		if(!cambiosDis.contains(estadoNuevo)) {
+			throw new ReglaDeNegocioInvalidaException("No se puede pasar de " + estadoActual + " a "
+					+ estadoNuevo);
+		}
+		
+	}
+	
+	private void cambioEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion) {
+		habitacionClient.actualizarEstadoHabitacionSinRestriccion(idHabitacion, idEstadoHabitacion);
+	}
+	
+	private void cambiarEstadoConformeReserva(EstadoReserva estadoReserva,Long idHabitacion) {
+		if(estadoReserva.equals(EstadoReserva.FINALIZADA)) {
+			cambioEstadoHabitacion(idHabitacion, 1L);
 		}
 	}
 

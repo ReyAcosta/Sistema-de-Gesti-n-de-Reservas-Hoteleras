@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vdr.common_reservaciones.controllers.CommonController;
@@ -32,10 +33,25 @@ public class HabitacionController extends CommonController<HabitacionRequest, Ha
 		return ResponseEntity.ok(service.actualizarEstadoHabitacion(id, idEstado));
 	}
 	
-	@GetMapping("/{id}/validaEstado")
-	public void validarEstadoHabitacion(@PathVariable Long id) {
-		service.validarEstadoHabitacion(id);
+	@PutMapping("/{id}/estado/{idEstado}")
+	public ResponseEntity<HabitacionResponse> actualizarEstadoHabitacionSinRestriccion(@PathVariable Long id,
+																		@PathVariable Long idEstado){
+		return ResponseEntity.ok(service.actualizarEstadoHabitacion(id, idEstado));
 	}
+	
+	@GetMapping("/{id}/validaEstado")
+	public ResponseEntity<Void> validarEstadoHabitacion(@PathVariable Long id) {
+		service.validarHabitacionDisponible(id);
+		return ResponseEntity.ok().build();
+	}
+	
+	@PutMapping("/{idHabitacionActual}/cambio/{idHabitacionNueva}")
+	public ResponseEntity<Void> cambioHabitacion(@PathVariable Long idHabitacionActual,
+												@PathVariable Long idHabitacionNueva){
+		service.cambioHabitacion(idHabitacionActual, idHabitacionNueva);
+		return ResponseEntity.ok().build();
+	}
+	
 	
 	
 }

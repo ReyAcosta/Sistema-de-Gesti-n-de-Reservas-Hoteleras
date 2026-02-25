@@ -1,7 +1,8 @@
 package com.vdr.habitaciones.services;
 
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
@@ -76,8 +77,6 @@ public class HabitacionServiceImpl implements HabitacionService{
 		Habitacion habitacion = getHabitacionOrThrow(idHabitacion);
 		EstadoHabitacion estado = EstadoHabitacion.fromCodigo(idEstadoHabitacion); 
 		
-		validarEstadoHabitacion(idHabitacion);
-		
 		habitacion.setEstadoHabitacion(estado);
 		habitacionRepository.save(habitacion);
 		return habitacionMapper.entityToResponse(habitacion);
@@ -88,11 +87,26 @@ public class HabitacionServiceImpl implements HabitacionService{
 		Habitacion habitacion = getHabitacionOrThrow(id);
 		//validarEstadoHabitacion(id);
 		
-		validarEstadoHabitacion(id);
+		validarEstadoHabitacion(habitacion);
 		habitacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
-		habitacionRepository.save(habitacion);
+		
 	}
 	
+	@Override
+	public void validarHabitacionDisponible(Long idHbitacion ) {
+		Habitacion habitacion = getHabitacionOrThrow(idHbitacion);
+		validarEstadoHabitacion(habitacion);
+	}
+	
+	@Override
+	public void cambioHabitacion(Long idHabitacionActual, Long idHabitacionNueva) {
+		Habitacion habActual = getHabitacionOrThrow(idHabitacionActual);
+		Habitacion habNueva = getHabitacionOrThrow(idHabitacionNueva);
+		
+		habActual.setEstadoHabitacion(EstadoHabitacion.DISPONIBLE);
+		habActual.setEstadoHabitacion(EstadoHabitacion.OCUPADA);
+		
+	}
 	/*-----------Metodos Privados----------*/
 	
 	 private Habitacion getHabitacionOrThrow(Long id){
@@ -121,18 +135,20 @@ public class HabitacionServiceImpl implements HabitacionService{
 			}
 		}
 	
-		
-		
-		/*--------------------metodos publicos ----------------------------------*/
-		public void validarEstadoHabitacion(Long id) {
-			Habitacion habitacion = getHabitacionOrThrow(id);
+		private void validarEstadoHabitacion(Habitacion habitacion) {
 			
- 			if(!habitacion.getEstadoHabitacion().equals(EstadoHabitacion.DISPONIBLE)) {
- 				
- 				throw new ReglaDeNegocioInvalidaException("no se puede cambiar el estado de la habitacion si esta ocupada o en uso");
- 			}
- 			
- 			
+				if(!habitacion.getEstadoHabitacion().equals(EstadoHabitacion.DISPONIBLE)) {
+					
+					throw new ReglaDeNegocioInvalidaException("La habitacion se encuentra en uso");
+				}
+				
 		}
+		
+		
+		
+		
+		
+		
+		
 		
 }
