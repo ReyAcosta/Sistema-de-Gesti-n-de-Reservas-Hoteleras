@@ -7,7 +7,7 @@ import com.vdr.common_reservaciones.service.CrudService;
 public interface HabitacionService extends CrudService<HabitacionRequest, HabitacionResponse> {
 	HabitacionResponse obtenerPorIdSinEstado(Long id);
 	
-	HabitacionResponse actualizarEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion); 
+	HabitacionResponse actualizarEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion, Boolean idFeig); 
 	
 	void validarHabitacionDisponible(Long idHabitacion);
 	

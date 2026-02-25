@@ -1,5 +1,8 @@
 package com.vdr.reservaciones.controllers;
 
+import java.util.List;
+
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,6 +18,16 @@ import com.vdr.reservaciones.services.ReservacionService;
 public class ReservacionController extends CommonController<ReservacionRequest, ReservacionResponse, ReservacionService> {
 	public ReservacionController(ReservacionService service) {
 		super(service);
+	}
+	
+	@GetMapping("/eliminadas")
+	public ResponseEntity<List<ReservacionResponse>> listarEliminadas(){
+		return ResponseEntity.ok(service.listarEliminadas());
+	}
+	
+	@GetMapping("/id-reservacion/{id}")
+	public ResponseEntity<ReservacionResponse> listarEliminadas(@PathVariable Long id){
+		return ResponseEntity.ok(service.obtenerPorIdSinEstado(id));
 	}
 	
 	@PatchMapping("/{idReservacion}/estado/{idEstado}")

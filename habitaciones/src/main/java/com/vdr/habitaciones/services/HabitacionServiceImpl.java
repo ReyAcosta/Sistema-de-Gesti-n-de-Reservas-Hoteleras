@@ -71,11 +71,14 @@ public class HabitacionServiceImpl implements HabitacionService{
 	}
 	
 	@Override
-	public HabitacionResponse actualizarEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion) {
+	public HabitacionResponse actualizarEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion, Boolean isFeign) {
 		Habitacion habitacion = getHabitacionOrThrow(idHabitacion);
 		EstadoHabitacion estado = EstadoHabitacion.fromCodigo(idEstadoHabitacion); 
 		
-		verificarEstadoTransicionHabitacion(habitacion.getEstadoHabitacion(), estado);
+		if(!isFeign) {
+			verificarEstadoTransicionHabitacion(habitacion.getEstadoHabitacion(), estado);
+		}
+		
 		
 		habitacion.setEstadoHabitacion(estado);
 		habitacionRepository.save(habitacion);

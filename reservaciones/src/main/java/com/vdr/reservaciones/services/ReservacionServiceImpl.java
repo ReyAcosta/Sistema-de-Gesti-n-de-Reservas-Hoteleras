@@ -1,33 +1,19 @@
 package com.vdr.reservaciones.services;
 
-import java.time.LocalDateTime;
-
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.vdr.common_reservaciones.clients.HabitacionClient;
-import com.vdr.common_reservaciones.clients.HuespedClient;
-
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
-
-import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
-
 import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
-
 import com.vdr.reservaciones.dtos.ReservacionRequest;
 import com.vdr.reservaciones.dtos.ReservacionResponse;
 import com.vdr.reservaciones.entities.Reservacion;
 import com.vdr.reservaciones.enums.EstadoReserva;
 import com.vdr.reservaciones.mapper.ReservacionMapper;
 import com.vdr.reservaciones.repositories.ReservacionRepository;
-
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,8 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ReservacionServiceImpl implements ReservacionService{
 	private final ReservacionRepository reservacionRepository;
 	private final ReservacionMapper reservacionMapper;
-	private final HuespedClient huespedClient;
-	private final HabitacionClient habitacionClient;
+	private final ReservacionIntegrationServices servicesClients;
+	private final ReservacionValidator validar;
+	
 
 	@Override
 	@Transactional(readOnly = true)
@@ -51,6 +38,17 @@ public class ReservacionServiceImpl implements ReservacionService{
 						getHuespedResponse(reserva.getIdHuesped()),
 						getHabitacionResponse(reserva.getIdHabitacion()) )).toList() ;		
 	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<ReservacionResponse> listarEliminadas() {
+		return reservacionRepository.findAll().stream()
+				.map(reserva -> reservacionMapper.entityToResponse(
+						reserva,
+						getHuespedResponseSinEstado(reserva.getIdHuesped()),
+						getHabitacionResponseSinEstado(reserva.getIdHabitacion()) )).toList() ;		
+	}
+
 
 	@Override
 	@Transactional(readOnly = true)
@@ -63,23 +61,33 @@ public class ReservacionServiceImpl implements ReservacionService{
 				getHabitacionResponse(reservacion.getIdHabitacion()));
 	}
 	
+	@Override
+	@Transactional(readOnly = true)
+	public ReservacionResponse obtenerPorIdSinEstado(Long id) {
+		Reservacion reservacion = getReservacionOrThrowSinEstado													(id);
+		
+		return reservacionMapper.entityToResponse(reservacion,
+				getHuespedResponseSinEstado(reservacion.getIdHuesped()),
+				getHabitacionResponseSinEstado(reservacion.getIdHabitacion()));
+	}	
+	
 
 	@Override
-	
 	public ReservacionResponse registrar(ReservacionRequest request) {
 		log.info("Registrando nueva reservación");
 		HuespedResponse huesped =getHuespedResponse(request.idHuesped());
-		habitacionClient.validarEstadoHabitacion(request.idHabitacion());
-		HabitacionResponse habitacion = habitacionClient.obtenerHabitacionPorId(request.idHabitacion());
+		servicesClients.validarEstadoHabitacion(request.idHabitacion());
+		HabitacionResponse habitacion = servicesClients.obtenerHabitacionPorId(request.idHabitacion());
 		
         Reservacion reservacion = reservacionMapper.requestToEntity(request);
         Reservacion guardada = reservacionRepository.save(reservacion);
         
-        habitacionClient.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 2L);
+        servicesClients.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 2L);
         
 
         return reservacionMapper.entityToResponse(guardada, huesped, habitacion);
 	}
+	
 
 	@Override
 	public ReservacionResponse actualizar(ReservacionRequest request, Long id) {
@@ -87,8 +95,8 @@ public class ReservacionServiceImpl implements ReservacionService{
 
 	        Reservacion reservacion = getReservacionOrThrow(id);
 	        
-	        verificarCambiosEstadoReserva(request, reservacion);
-	        verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
+	        validar.verificarCambiosEstadoReserva(request, reservacion);
+	        servicesClients.verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
 	        
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
@@ -97,14 +105,16 @@ public class ReservacionServiceImpl implements ReservacionService{
 	        		getHabitacionResponse(reservacion.getIdHabitacion()));
 	}
 	
+	
+	
 	@Override
 	public ReservacionResponse actualizarEstadoReserva(Long idReserva, Long idEstadoReserva) {
 		Reservacion reserva = getReservacionOrThrow(idReserva);
 		EstadoReserva estado = EstadoReserva.fromCodigo(idEstadoReserva);
-		verificarEstadoReserva(reserva.getEstadoReserva(), estado);
+		validar.verificarEstadoReserva(reserva.getEstadoReserva(), estado);
 		
 		
-		cambiarEstadoConformeReserva(estado, reserva.getIdHabitacion());
+		servicesClients.cambiarEstadoConformeReserva(estado, reserva.getIdHabitacion());
 		
 		reserva.setEstadoReserva(estado);
 		
@@ -112,6 +122,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 				getHuespedResponse(reserva.getIdHuesped()),
 				getHabitacionResponse(reserva.getIdHabitacion()));
 	}
+	
 
 	@Override
 	public void eliminar(Long id) {
@@ -120,6 +131,8 @@ public class ReservacionServiceImpl implements ReservacionService{
         
         reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 	}
+	
+	
 	
 	@Override
 	public void huespedTieneConsultasConfirmadasEnCurso(Long idHuesped) {
@@ -148,103 +161,20 @@ public class ReservacionServiceImpl implements ReservacionService{
 	}
 	
 	private HabitacionResponse getHabitacionResponse(Long id) {
-		return habitacionClient.obtenerHabitacionPorId(id);
+		return servicesClients.obtenerHabitacionPorId(id);
 	}
 	
 	private HuespedResponse getHuespedResponse(Long id) {
-		return huespedClient.obtenerHuespedPorId(id);
+		return servicesClients.obtenerHuespedPorId(id);
+	}
+	
+	private HabitacionResponse getHabitacionResponseSinEstado(Long id) {
+		return servicesClients.obtenerHabitacionPorIdSinEstado(id);
+	}
+	
+	private HuespedResponse getHuespedResponseSinEstado(Long id) {
+		return servicesClients.obtenerHuespedPorIdSinEstado(id);
 	}
 
-	
-	
-	
-	
-	private void verificarCambiosEstadoReserva(ReservacionRequest request, Reservacion reservacion) {
-		verificarFechaInicioFechaFin(request.fechaInicio(), request.fechaFin());
-		
-		
-		
-		if(reservacion.getEstadoReserva().equals(EstadoReserva.FINALIZADA) ||
-				reservacion.getEstadoReserva().equals(EstadoReserva.CANCELADA)) {
-			throw new ReglaDeNegocioInvalidaException("No se puede modificar la la reservacion porque ya se encuentra en"
-					+ "finalizada o cancelada");}
-		
-		if(!reservacion.getFechaFin().equals(request.fechaFin()) &&(
-				!reservacion.getEstadoReserva().equals(EstadoReserva.CONFIRMADA) &&
-				!reservacion.getEstadoReserva().equals(EstadoReserva.EN_CURSO)) ) {
-				throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha salida  porque"
-						+ "ya no esta en estado confirmada o en curso");
-			}
-		
-		if(!reservacion.getFechaInicio().equals(request.fechaInicio()) &&
-				!reservacion.getEstadoReserva().equals(EstadoReserva.CONFIRMADA)) {
-			throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha de salida  porque"
-					+ "ya no esta en estado confirmada");}
-		
-		
-		
-	}
-	
-	private void verificarCambiosHuespedHabitacionEnReserva(ReservacionRequest request, Reservacion reservacion) {
-		if(!reservacion.getIdHuesped().equals(request.idHuesped())) {
-			throw new IllegalArgumentException("No se puede modificar el usuario");
-		}
-		
-		if(!reservacion.getIdHabitacion().equals(request.idHabitacion()) && 
-				reservacion.getEstadoReserva().equals(EstadoReserva.EN_CURSO)) {
-			throw new ReglaDeNegocioInvalidaException("No se puede cambiar de habitacion con la reserva en curso");
-		}
-		
-			if(!reservacion.getIdHabitacion().equals(request.idHabitacion())) {
-				habitacionClient.validarEstadoHabitacion(request.idHabitacion());
-				habitacionClient.cambioHabitacion(reservacion.getIdHabitacion(),request.idHabitacion());
-			}
-		
-	}
-	
-	private void verificarFechaInicioFechaFin(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
-		if(fechaInicio.isAfter(fechaFin)) {
-			throw new IllegalArgumentException("La fecha de inicio no puede ser despue de la de fin");
-		}
-	}
-	
-	static final Map<EstadoReserva, List<EstadoReserva>> cambiosDisponibles = Map.of(
-			EstadoReserva.CONFIRMADA, List.of(EstadoReserva.EN_CURSO, EstadoReserva.CANCELADA),
-			EstadoReserva.EN_CURSO, List.of(EstadoReserva.FINALIZADA)
-	);
-	
-	private void verificarEstadoReserva(EstadoReserva estadoActual, EstadoReserva estadoNuevo) {
-		log.info("estado actual: {}, estado nuevo: {}", estadoActual, estadoNuevo);
-		
-		log.info("Clase estadoActual: {}", estadoActual.getClass().getName());
-		log.info("Clase enum del map: {}", EstadoReserva.EN_CURSO.getClass().getName());
-		
-		if(estadoActual.equals(estadoNuevo)) {
-			throw new ReglaDeNegocioInvalidaException("La reservacion ya se encuentra en estado " + estadoNuevo);
-		}
-		
-		if(estadoActual.equals(EstadoReserva.FINALIZADA)|| estadoActual.equals(EstadoReserva.CANCELADA)){
-			throw new ReglaDeNegocioInvalidaException("Cambio no permitido");
-		}
-		
-		List<EstadoReserva> cambiosDis = cambiosDisponibles.getOrDefault(estadoActual, List.of());
-		
-		if(!cambiosDis.contains(estadoNuevo)) {
-			throw new ReglaDeNegocioInvalidaException("No se puede pasar de " + estadoActual + " a "
-					+ estadoNuevo);
-		}
-		
-	}
-	
-	private void cambioEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion) {
-		habitacionClient.actualizarEstadoHabitacionSinRestriccion(idHabitacion, idEstadoHabitacion);
-	}
-	
-	private void cambiarEstadoConformeReserva(EstadoReserva estadoReserva,Long idHabitacion) {
-		if(estadoReserva.equals(EstadoReserva.FINALIZADA)) {
-			cambioEstadoHabitacion(idHabitacion, 1L);
-		}
-	}
-	
 
 }

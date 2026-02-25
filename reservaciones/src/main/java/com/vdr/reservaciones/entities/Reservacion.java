@@ -2,6 +2,7 @@ package com.vdr.reservaciones.entities;
 
 import java.time.LocalDateTime;
 
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
@@ -15,7 +16,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
