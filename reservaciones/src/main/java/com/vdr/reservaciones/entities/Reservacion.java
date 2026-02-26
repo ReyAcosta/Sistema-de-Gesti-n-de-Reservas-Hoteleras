@@ -2,6 +2,7 @@ package com.vdr.reservaciones.entities;
 
 import java.time.LocalDateTime;
 
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
@@ -46,10 +47,10 @@ public class Reservacion{
 	    @CreationTimestamp
 	    private LocalDateTime fechaReserva;
 	    
-	    @Column(name = "FECHA_INICIO", updatable = false, insertable = false)  
+	    @Column(name = "FECHA_INICIO") 
 	    private LocalDateTime fechaInicio;
 	    
-	    @Column(name = "FECHA_FIN", updatable = false, insertable = false)
+	    @Column(name = "FECHA_FIN")
 	    private LocalDateTime fechaFin;
 
 	

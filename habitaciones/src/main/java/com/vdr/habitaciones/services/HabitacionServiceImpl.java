@@ -1,7 +1,7 @@
 package com.vdr.habitaciones.services;
 
 import java.util.List;
-
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
@@ -15,7 +15,6 @@ import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
 import com.vdr.habitaciones.entities.Habitacion;
 import com.vdr.habitaciones.mapper.HabitacionMapper;
 import com.vdr.habitaciones.repository.HabitacionRepository;
-
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +53,8 @@ public class HabitacionServiceImpl implements HabitacionService{
 	public HabitacionResponse registrar(HabitacionRequest request) {
 		log.info("Iniciadno registrar habitacion: {}", request);
 		validarNumeroHabitacionUnico(request.numeroHabitacion());
+		//validarEstadoHabitacion(request.idEstadoHabitacion());
 		Habitacion habitacion = habitacionRepository.save(habitacionMapper.requestToEntity(request));
-		
 		return habitacionMapper.entityToResponse(habitacion);
 	}
 
@@ -64,29 +63,53 @@ public class HabitacionServiceImpl implements HabitacionService{
 		log.info("Iniciando actualizar habitacion con id: {}", id);
 		Habitacion habitacion = getHabitacionOrThrow(id);
 		validarNumeroHabitacionUnicoActualizar(request.numeroHabitacion(), id);
+		
 		habitacionMapper.updateEntityFromRequest(request, habitacion);
 		
-		
+		habitacionRepository.save(habitacion);
 		return habitacionMapper.entityToResponse(habitacion);
 	}
 	
 	@Override
-	public HabitacionResponse actualizarEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion) {
-		Habitacion habitacion = getHabitacionOrThrow(idEstadoHabitacion);
+	public HabitacionResponse actualizarEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion, Boolean isFeign) {
+		Habitacion habitacion = getHabitacionOrThrow(idHabitacion);
 		EstadoHabitacion estado = EstadoHabitacion.fromCodigo(idEstadoHabitacion); 
 		
-		habitacion.setEstadoHabitacion(estado);
+		if(!isFeign) {
+			verificarEstadoTransicionHabitacion(habitacion.getEstadoHabitacion(), estado);
+		}
 		
+		
+		habitacion.setEstadoHabitacion(estado);
+		habitacionRepository.save(habitacion);
 		return habitacionMapper.entityToResponse(habitacion);
 	}
 
 	@Override
 	public void eliminar(Long id) {
 		Habitacion habitacion = getHabitacionOrThrow(id);
+		//validarEstadoHabitacion(id);
 		
+		validarEstadoHabitacion(habitacion);
 		habitacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
+		
 	}
 	
+	@Override
+	public void validarHabitacionDisponible(Long idHbitacion ) {
+		Habitacion habitacion = getHabitacionOrThrow(idHbitacion);
+		validarEstadoHabitacion(habitacion);
+	}
+	
+	@Override
+	public void cambioHabitacion(Long idHabitacionActual, Long idHabitacionNueva) {
+		Habitacion habActual = getHabitacionOrThrow(idHabitacionActual);
+		Habitacion habNueva = getHabitacionOrThrow(idHabitacionNueva);
+		
+		habActual.setEstadoHabitacion(EstadoHabitacion.DISPONIBLE);
+		habNueva.setEstadoHabitacion(EstadoHabitacion.OCUPADA);
+		
+	}
 	/*-----------Metodos Privados----------*/
 	
 	 private Habitacion getHabitacionOrThrow(Long id){
@@ -115,4 +138,39 @@ public class HabitacionServiceImpl implements HabitacionService{
 			}
 		}
 	
+		private void validarEstadoHabitacion(Habitacion habitacion) {
+			
+				if(!habitacion.getEstadoHabitacion().equals(EstadoHabitacion.DISPONIBLE)) {
+					
+					throw new ReglaDeNegocioInvalidaException("La habitacion se encuentra en uso");
+				}
+				
+		}
+		
+		static final Map<EstadoHabitacion, List<EstadoHabitacion>> cambiosDisponibles = Map.of(
+				EstadoHabitacion.DISPONIBLE, List.of(
+						EstadoHabitacion.OCUPADA,
+						EstadoHabitacion.MANTENIMIENTO,
+						EstadoHabitacion.LIMPIEZA),
+				EstadoHabitacion.OCUPADA, List.of(
+						EstadoHabitacion.MANTENIMIENTO,
+						EstadoHabitacion.LIMPIEZA),
+				EstadoHabitacion.MANTENIMIENTO, List.of(
+						EstadoHabitacion.LIMPIEZA),
+				EstadoHabitacion.LIMPIEZA, List.of(
+						EstadoHabitacion.DISPONIBLE)
+		);
+		private void verificarEstadoTransicionHabitacion(EstadoHabitacion estadoActual,EstadoHabitacion estadoNuevo) {
+			List<EstadoHabitacion> cambiosDis = cambiosDisponibles.getOrDefault(estadoActual, List.of());
+			
+			if(!cambiosDis.contains(estadoNuevo)) {
+				throw new ReglaDeNegocioInvalidaException("No se puede pasar de " + estadoActual + " a "
+						+ estadoNuevo);
+			}
+		}
+		
+		
+		
+		
+		
 }

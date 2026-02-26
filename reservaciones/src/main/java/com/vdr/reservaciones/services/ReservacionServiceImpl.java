@@ -4,10 +4,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.vdr.common_reservaciones.clients.HabitacionClient;
-import com.vdr.common_reservaciones.clients.HuespedClient;
-
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
@@ -18,8 +14,6 @@ import com.vdr.reservaciones.entities.Reservacion;
 import com.vdr.reservaciones.enums.EstadoReserva;
 import com.vdr.reservaciones.mapper.ReservacionMapper;
 import com.vdr.reservaciones.repositories.ReservacionRepository;
-
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,8 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ReservacionServiceImpl implements ReservacionService{
 	private final ReservacionRepository reservacionRepository;
 	private final ReservacionMapper reservacionMapper;
-	private final HuespedClient huespedClient;
-	private final HabitacionClient habitacionClient;
+	private final ReservacionIntegrationServices servicesClients;
+	private final ReservacionValidator validar;
+	
 
 	@Override
 	@Transactional(readOnly = true)
@@ -43,6 +38,17 @@ public class ReservacionServiceImpl implements ReservacionService{
 						getHuespedResponse(reserva.getIdHuesped()),
 						getHabitacionResponse(reserva.getIdHabitacion()) )).toList() ;		
 	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<ReservacionResponse> listarEliminadas() {
+		return reservacionRepository.findAll().stream()
+				.map(reserva -> reservacionMapper.entityToResponse(
+						reserva,
+						getHuespedResponseSinEstado(reserva.getIdHuesped()),
+						getHabitacionResponseSinEstado(reserva.getIdHabitacion()) )).toList() ;		
+	}
+
 
 	@Override
 	@Transactional(readOnly = true)
@@ -55,25 +61,43 @@ public class ReservacionServiceImpl implements ReservacionService{
 				getHabitacionResponse(reservacion.getIdHabitacion()));
 	}
 	
+	@Override
+	@Transactional(readOnly = true)
+	public ReservacionResponse obtenerPorIdSinEstado(Long id) {
+		Reservacion reservacion = getReservacionOrThrowSinEstado													(id);
+		
+		return reservacionMapper.entityToResponse(reservacion,
+				getHuespedResponseSinEstado(reservacion.getIdHuesped()),
+				getHabitacionResponseSinEstado(reservacion.getIdHabitacion()));
+	}	
+	
 
 	@Override
-	
 	public ReservacionResponse registrar(ReservacionRequest request) {
 		log.info("Registrando nueva reservación");
-
+		HuespedResponse huesped =getHuespedResponse(request.idHuesped());
+		servicesClients.validarEstadoHabitacion(request.idHabitacion());
+		HabitacionResponse habitacion = servicesClients.obtenerHabitacionPorId(request.idHabitacion());
+		
         Reservacion reservacion = reservacionMapper.requestToEntity(request);
-
         Reservacion guardada = reservacionRepository.save(reservacion);
+        
+        servicesClients.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 2L);
+        
 
-        return reservacionMapper.entityToResponse(guardada, getHuespedResponse(request.idHuesped()),getHabitacionResponse(request.idHabitacion()));
+        return reservacionMapper.entityToResponse(guardada, huesped, habitacion);
 	}
+	
 
 	@Override
 	public ReservacionResponse actualizar(ReservacionRequest request, Long id) {
 		 log.info("Actualizando reservación con id: {}", id);
 
 	        Reservacion reservacion = getReservacionOrThrow(id);
-
+	        
+	        validar.verificarCambiosEstadoReserva(request, reservacion);
+	        servicesClients.verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
+	        
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
 	        return reservacionMapper.entityToResponse(reservacion,
@@ -81,18 +105,24 @@ public class ReservacionServiceImpl implements ReservacionService{
 	        		getHabitacionResponse(reservacion.getIdHabitacion()));
 	}
 	
+	
+	
 	@Override
 	public ReservacionResponse actualizarEstadoReserva(Long idReserva, Long idEstadoReserva) {
 		Reservacion reserva = getReservacionOrThrow(idReserva);
 		EstadoReserva estado = EstadoReserva.fromCodigo(idEstadoReserva);
+		validar.verificarEstadoReserva(reserva.getEstadoReserva(), estado);
+		
+		
+		servicesClients.cambiarEstadoConformeReserva(estado, reserva.getIdHabitacion());
 		
 		reserva.setEstadoReserva(estado);
-		
 		
 		return reservacionMapper.entityToResponse(reserva,
 				getHuespedResponse(reserva.getIdHuesped()),
 				getHabitacionResponse(reserva.getIdHabitacion()));
 	}
+	
 
 	@Override
 	public void eliminar(Long id) {
@@ -101,6 +131,8 @@ public class ReservacionServiceImpl implements ReservacionService{
         
         reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 	}
+	
+	
 	
 	@Override
 	public void huespedTieneConsultasConfirmadasEnCurso(Long idHuesped) {
@@ -129,15 +161,20 @@ public class ReservacionServiceImpl implements ReservacionService{
 	}
 	
 	private HabitacionResponse getHabitacionResponse(Long id) {
-		return habitacionClient.obtenerHabitacionPorId(id);
+		return servicesClients.obtenerHabitacionPorId(id);
 	}
 	
 	private HuespedResponse getHuespedResponse(Long id) {
-		return huespedClient.obtenerHuespedPorId(id);
+		return servicesClients.obtenerHuespedPorId(id);
+	}
+	
+	private HabitacionResponse getHabitacionResponseSinEstado(Long id) {
+		return servicesClients.obtenerHabitacionPorIdSinEstado(id);
+	}
+	
+	private HuespedResponse getHuespedResponseSinEstado(Long id) {
+		return servicesClients.obtenerHuespedPorIdSinEstado(id);
 	}
 
-
- 
-	
 
 }

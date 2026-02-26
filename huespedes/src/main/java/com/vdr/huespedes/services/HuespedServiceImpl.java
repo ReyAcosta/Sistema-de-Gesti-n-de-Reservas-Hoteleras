@@ -1,6 +1,7 @@
 package com.vdr.huespedes.services;
 
 import java.util.List;
+
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
@@ -10,7 +11,6 @@ import com.vdr.common_reservaciones.dtos.huespedes.HuespedRequest;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.common_reservaciones.enums.TipoDocumento;
-import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
 import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
 import com.vdr.huespedes.entities.Huesped;
 import com.vdr.huespedes.mappers.HuespedMapper;
@@ -125,7 +125,7 @@ public class HuespedServiceImpl implements HuespedService {
 	private void validarDatosUnicos(HuespedRequest request) {
 		verificarEmailUnico(request.email());
 		verificarTelefonoUnico(request.telefono());
-	//	verificarDocumentoUnico(request.idDocumento());
+		verificarDocumentoUnico(TipoDocumento.fromCodigo(request.idDocumento()));
 	}
 	
 	/*---------verificar datos unicos al actualizar---------------*/

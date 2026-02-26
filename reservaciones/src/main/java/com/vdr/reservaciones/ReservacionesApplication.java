@@ -1,6 +1,7 @@
 package com.vdr.reservaciones;
 
 import org.springframework.boot.SpringApplication;
+
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"com.vdr.reservaciones", "com.vdr.common_reservaciones"})

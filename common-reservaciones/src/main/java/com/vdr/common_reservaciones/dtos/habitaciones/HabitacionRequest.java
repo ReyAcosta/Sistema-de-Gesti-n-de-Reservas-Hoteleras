@@ -25,10 +25,6 @@ public record HabitacionRequest(
 
 	    @NotNull(message = "La capacidad es requerida")
 	    @Min(value = 1, message = "La capacidad mínima es 1")
-	    Short capacidad,
-	    
-	    @NotNull(message = "El id es requerido")
-	    @Positive(message = "El id del estado de la habitacion debe de ser positivo")
-	    Long idEstadoHabitacion
+	    Short capacidad
 
 	) {}
