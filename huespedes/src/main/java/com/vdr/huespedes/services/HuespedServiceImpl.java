@@ -63,7 +63,7 @@ public class HuespedServiceImpl implements HuespedService {
 	        
 	        verificarEmailUnicoActualizar(id, huesped.getEmail());
 	        verificarTelefonoUnicoActualizar(id, huesped.getTelefono());
-	        verificarTipoDocumentoUnicoActualizar(id, huesped.getTipoDocumento());
+//	        verificarTipoDocumentoUnicoActualizar(id, huesped.getTipoDocumento());
 	        
 	        huespedMapper.updateEntityFromRequest(request, huesped);
 
@@ -116,16 +116,16 @@ public class HuespedServiceImpl implements HuespedService {
 		}
 	}
 	
-	private void verificarDocumentoUnico(TipoDocumento tipoDocumento) {
-		if(huespedRepository.existsByTipoDocumentoAndEstadoRegistro(tipoDocumento, EstadoRegistro.ACTIVO)) {
-			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
-		}
-	}
+//	private void verificarDocumentoUnico(TipoDocumento tipoDocumento) {
+//		if(huespedRepository.existsByTipoDocumentoAndEstadoRegistro(tipoDocumento, EstadoRegistro.ACTIVO)) {
+//			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
+//		}
+//	}
 	
 	private void validarDatosUnicos(HuespedRequest request) {
 		verificarEmailUnico(request.email());
 		verificarTelefonoUnico(request.telefono());
-		verificarDocumentoUnico(TipoDocumento.fromCodigo(request.idDocumento()));
+//		verificarDocumentoUnico(TipoDocumento.fromCodigo(request.idDocumento()));
 	}
 	
 	/*---------verificar datos unicos al actualizar---------------*/
@@ -142,10 +142,10 @@ public class HuespedServiceImpl implements HuespedService {
 		}
 	}
 	
-	private void verificarTipoDocumentoUnicoActualizar(Long id, TipoDocumento tipoDocumento) {
-		if(huespedRepository.existsByTipoDocumentoAndIdNotAndEstadoRegistro(tipoDocumento, id, EstadoRegistro.ACTIVO)) {
-			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
-		}
-	}
+//	private void verificarTipoDocumentoUnicoActualizar(Long id, TipoDocumento tipoDocumento) {
+//		if(huespedRepository.existsByTipoDocumentoAndIdNotAndEstadoRegistro(tipoDocumento, id, EstadoRegistro.ACTIVO)) {
+//			throw new ReglaDeNegocioInvalidaException("Ya existe un huesped con documento: " + tipoDocumento);
+//		}
+//	}
 	
 }

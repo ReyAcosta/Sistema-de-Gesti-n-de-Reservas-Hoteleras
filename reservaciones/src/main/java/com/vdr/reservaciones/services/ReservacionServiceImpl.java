@@ -76,8 +76,10 @@ public class ReservacionServiceImpl implements ReservacionService{
 	public ReservacionResponse registrar(ReservacionRequest request) {
 		log.info("Registrando nueva reservación");
 		HuespedResponse huesped =getHuespedResponse(request.idHuesped());
-		servicesClients.validarEstadoHabitacion(request.idHabitacion());
 		HabitacionResponse habitacion = servicesClients.obtenerHabitacionPorId(request.idHabitacion());
+		servicesClients.validarEstadoHabitacion(habitacion.id());
+		validar.verificarFechaInicioFechaFin(request.fechaInicio(), request.fechaFin());
+		chocaHorario(request);
 		
         Reservacion reservacion = reservacionMapper.requestToEntity(request);
         Reservacion guardada = reservacionRepository.save(reservacion);
@@ -97,6 +99,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 	        
 	        validar.verificarCambiosEstadoReserva(request, reservacion);
 	        servicesClients.verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
+	        chocaHorario(request);
 	        
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
@@ -129,6 +132,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 		log.info("Eliminando reservación con id: {}", id);
         Reservacion reservacion = getReservacionOrThrow(id);
         
+        servicesClients.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 1L);
         reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 	}
 	
@@ -176,5 +180,12 @@ public class ReservacionServiceImpl implements ReservacionService{
 		return servicesClients.obtenerHuespedPorIdSinEstado(id);
 	}
 
+	private void chocaHorario(ReservacionRequest request) {
+		if(reservacionRepository.chocaHorario(request.fechaInicio(),
+				request.fechaFin(), request.idHabitacion(), EstadoRegistro.ACTIVO.toString(), EstadoReserva.CONFIRMADA.toString() ) > 0) {
+			throw new IllegalArgumentException("La habitacion con id: " + request.idHabitacion() +
+					"se encuentra ocupada");
+		}
+	}
 
 }

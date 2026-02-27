@@ -45,7 +45,7 @@ public final class ReservacionValidator {
 	}
 	
 	
-	private void verificarFechaInicioFechaFin(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+	public void verificarFechaInicioFechaFin(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
 		if(fechaInicio.isAfter(fechaFin)) {
 			throw new IllegalArgumentException("La fecha de inicio no puede ser despue de la de fin");
 		}
@@ -74,5 +74,6 @@ public final class ReservacionValidator {
 					+ "ya no esta en estado confirmada");}
 			
 	}
+	
 
 }
