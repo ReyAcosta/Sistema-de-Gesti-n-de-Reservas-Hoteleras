@@ -10,7 +10,6 @@ import com.vdr.common_reservaciones.clients.ReservaClient;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedRequest;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
-import com.vdr.common_reservaciones.enums.TipoDocumento;
 import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
 import com.vdr.huespedes.entities.Huesped;
 import com.vdr.huespedes.mappers.HuespedMapper;
@@ -79,7 +78,7 @@ public class HuespedServiceImpl implements HuespedService {
 			
 			log.info("Eliminando paciente con id {}", id);
 	        
-
+	        reservaClient.eliminarReservacionSiHuespedEliminado(id);
 	        huesped.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 	        log.info("Eliminando paciente con id {}", id);
 			

@@ -16,4 +16,6 @@ public interface ReservacionService extends CrudService<ReservacionRequest, Rese
 	
 	void huespedTieneConsultasConfirmadasEnCurso(Long idHuesped);
 	
+	void eliminarReservacionSiHuespedEliminado(Long idHuesped);
+	
 }

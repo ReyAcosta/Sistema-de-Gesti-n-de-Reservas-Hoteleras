@@ -41,4 +41,10 @@ public class ReservacionController extends CommonController<ReservacionRequest, 
 		service.huespedTieneConsultasConfirmadasEnCurso(idHuesped);
 		return ResponseEntity.ok().build();
 	}
+	
+	@GetMapping("reservacion/id-huesped/{idHuesped}")
+	public ResponseEntity<Void> eliminarReservacionSiHuespedEliminado(@PathVariable Long idHuesped){
+		service.eliminarReservacionSiHuespedEliminado(idHuesped);
+		return ResponseEntity.ok().build();
+	}
 }

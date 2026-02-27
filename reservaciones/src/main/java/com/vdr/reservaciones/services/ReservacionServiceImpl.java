@@ -77,6 +77,9 @@ public class ReservacionServiceImpl implements ReservacionService{
 		log.info("Registrando nueva reservación");
 		HuespedResponse huesped =getHuespedResponse(request.idHuesped());
 		HabitacionResponse habitacion = servicesClients.obtenerHabitacionPorId(request.idHabitacion());
+		if(reservacionRepository.existsByIdHuespedAndEstadoRegistro(huesped.id(), EstadoRegistro.ACTIVO)) {
+			throw new IllegalArgumentException("El huesped ya tiene reservacion activa");
+		}
 		servicesClients.validarEstadoHabitacion(habitacion.id());
 		validar.verificarFechaInicioFechaFin(request.fechaInicio(), request.fechaFin());
 		chocaHorario(request);
@@ -148,6 +151,16 @@ public class ReservacionServiceImpl implements ReservacionService{
 			throw new EntidadRelacionadaException("No se puede modificar el huesped porque tiene reservaciones." + EstadoReserva.EN_CURSO);
 		}
 				
+	}
+	
+	@Override
+	public void eliminarReservacionSiHuespedEliminado(Long idHuesped) {
+		Reservacion reservacion = reservacionRepository.findByIdHuespedAndEstadoRegistro(idHuesped, EstadoRegistro.ACTIVO).orElseThrow(
+				()-> new NoSuchElementException("No se encontro reservacion ligada al huesped"));
+		
+		reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
+		servicesClients.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 1L);
+	      
 	}
 	
 	/*-------------------Comienzan metodos privados-----------*/
