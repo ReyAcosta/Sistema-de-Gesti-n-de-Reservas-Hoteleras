@@ -1,8 +1,9 @@
 package com.vdr.common_reservaciones.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -24,6 +25,9 @@ public interface HabitacionClient {
 	@PutMapping("/{idHabitacionActual}/cambio/{idHabitacionNueva}")
 	Void cambioHabitacion(@PathVariable Long idHabitacionActual,
 												@PathVariable Long idHabitacionNueva);
+	
+	@PatchMapping("/{id}/estado/{idEstado}")
+	HabitacionResponse actualizarEstadoHabitacion(@PathVariable Long id, @PathVariable Long idEstado);
 	
 	@GetMapping("/id-habitacion/{id}")
 	HabitacionResponse obtenerPorIdSinEstado(@PathVariable Long id);
