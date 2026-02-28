@@ -28,7 +28,8 @@ public class ReservacionServiceImpl implements ReservacionService{
 	private final ReservacionIntegrationServices servicesClients;
 	private final ReservacionValidator validar;
 	
-
+	
+/*---------------------------listar reservaciones----------------------------------*/
 	@Override
 	@Transactional(readOnly = true)
 	public List<ReservacionResponse> listar() {
@@ -43,14 +44,14 @@ public class ReservacionServiceImpl implements ReservacionService{
 	@Override
 	@Transactional(readOnly = true)
 	public List<ReservacionResponse> listarEliminadas() {
-		return reservacionRepository.findAll().stream()
+		return reservacionRepository.findByEstadoRegistro(EstadoRegistro.ELIMINADO).stream()
 				.map(reserva -> reservacionMapper.entityToResponse(
 						reserva,
 						getHuespedResponseSinEstado(reserva.getIdHuesped()),
 						getHabitacionResponseSinEstado(reserva.getIdHabitacion()) )).toList() ;		
 	}
 
-
+/*-----------------------------obtener por id--------------------*/
 	@Override
 	@Transactional(readOnly = true)
 	public ReservacionResponse obtenerPorId(Long id) {
@@ -65,14 +66,15 @@ public class ReservacionServiceImpl implements ReservacionService{
 	@Override
 	@Transactional(readOnly = true)
 	public ReservacionResponse obtenerPorIdSinEstado(Long id) {
-		Reservacion reservacion = getReservacionOrThrowSinEstado													(id);
+		Reservacion reservacion = reservacionRepository.findById(id).orElseThrow(
+				()-> new NoSuchElementException("No se econtro reservacion con id: " + id));
 		
 		return reservacionMapper.entityToResponse(reservacion,
 				getHuespedResponseSinEstado(reservacion.getIdHuesped()),
 				getHabitacionResponseSinEstado(reservacion.getIdHabitacion()));
 	}	
 	
-
+/*------------actualizar-------------------*/
 	@Override
 	public ReservacionResponse registrar(ReservacionRequest request) {
 		log.info("Registrando nueva reservación");
@@ -83,7 +85,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 		}
 		servicesClients.validarEstadoHabitacion(habitacion.id());
 		validar.verificarFechaInicioFechaFin(request.fechaInicio(), request.fechaFin());
-		chocaHorario(request);
+//		verificarSiHorarioCruzado(request);
 		
         Reservacion reservacion = reservacionMapper.requestToEntity(request);
         Reservacion guardada = reservacionRepository.save(reservacion);
@@ -103,7 +105,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 	        
 	        validar.verificarCambiosEstadoReserva(request, reservacion);
 	        servicesClients.verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
-	        chocaHorario(request);
+//	        verificarSiHorarioCruzado(request);
 	        
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
@@ -127,7 +129,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 				getHabitacionResponse(reserva.getIdHabitacion()));
 	}
 	
-
+/*---------------------------Eliminar-------------------------------*/
 	@Override
 	public void eliminar(Long id) {
 		log.info("Eliminando reservación con id: {}", id);
@@ -179,12 +181,6 @@ public class ReservacionServiceImpl implements ReservacionService{
 				()-> new NoSuchElementException("No se econtro reservacion activa con id: " + id));
 	}
 	
-	private Reservacion getReservacionOrThrowSinEstado(Long id) {
-		log.info("Buscando reservacion activa por id: {}",id);
-		return reservacionRepository.findById(id).orElseThrow(
-				()-> new NoSuchElementException("No se econtro reservacion con id: " + id));
-	}
-	
 	private HabitacionResponse getHabitacionResponse(Long id) {
 		return servicesClients.obtenerHabitacionPorId(id);
 	}
@@ -201,12 +197,12 @@ public class ReservacionServiceImpl implements ReservacionService{
 		return servicesClients.obtenerHuespedPorIdSinEstado(id);
 	}
 
-	private void chocaHorario(ReservacionRequest request) {
-		if(reservacionRepository.chocaHorario(request.fechaInicio(),
-				request.fechaFin(), request.idHabitacion(), EstadoRegistro.ACTIVO.toString(), EstadoReserva.CONFIRMADA.toString() ) > 0) {
-			throw new IllegalArgumentException("La habitacion con id: " + request.idHabitacion() +
-					"se encuentra ocupada");
-		}
-	}
+//	private void verificarSiHorarioCruzado(ReservacionRequest request) {
+//		if(reservacionRepository.chocaHorario(request.fechaInicio(),
+//				request.fechaFin(), request.idHabitacion(), EstadoRegistro.ACTIVO.toString(), EstadoReserva.CONFIRMADA.toString() ) > 0) {
+//			throw new IllegalArgumentException("La habitacion con id: " + request.idHabitacion() +
+//					"se encuentra ocupada");
+//		}
+//	}
 
 }

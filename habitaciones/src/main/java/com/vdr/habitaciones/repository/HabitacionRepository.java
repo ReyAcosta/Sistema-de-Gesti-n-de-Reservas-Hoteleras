@@ -22,6 +22,8 @@ public interface HabitacionRepository  extends JpaRepository<Habitacion, Long>{
 	
 	Boolean existsByNumeroHabitacionAndEstadoRegistroAndIdNot(Short numHabitacion, EstadoRegistro estadoRegistro, Long id);
 	
+	
+	
 	 
 
 }

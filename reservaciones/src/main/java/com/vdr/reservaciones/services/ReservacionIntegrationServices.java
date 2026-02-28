@@ -70,8 +70,5 @@ public class ReservacionIntegrationServices {
 	public HuespedResponse obtenerHuespedPorIdSinEstado(Long idHuesped) {
 		return huespedClient.obtenerPorIdSinEstado(idHuesped);
 	}
-	
-	
-	/*---------------Reservaciones-----------------*/
 		
 }

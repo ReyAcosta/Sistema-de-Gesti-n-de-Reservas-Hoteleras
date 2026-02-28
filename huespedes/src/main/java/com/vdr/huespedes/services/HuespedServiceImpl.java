@@ -2,9 +2,11 @@ package com.vdr.huespedes.services;
 
 import java.util.List;
 
+
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vdr.common_reservaciones.clients.ReservaClient;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedRequest;
@@ -15,7 +17,7 @@ import com.vdr.huespedes.entities.Huesped;
 import com.vdr.huespedes.mappers.HuespedMapper;
 import com.vdr.huespedes.repositories.HuespedRepository;
 
-import jakarta.transaction.Transactional;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +31,7 @@ public class HuespedServiceImpl implements HuespedService {
 	private final ReservaClient reservaClient;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public List<HuespedResponse> listar() {
 		log.info("Listando reservaciones activas");
         return huespedRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO).stream()
@@ -36,13 +39,18 @@ public class HuespedServiceImpl implements HuespedService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public HuespedResponse obtenerPorId(Long id) {
         return huespedMapper.entityToResponse(getHuespedOrThrow(id));
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public HuespedResponse obtenerPorIdSinEstado(Long id) {
-        return huespedMapper.entityToResponse(getHuespedOrThrowSinEstado(id));
+        Huesped huesped = huespedRepository.findById(id).orElseThrow(
+				() -> new NoSuchElementException("No se encotro un huesped con el id: "+ id));
+        
+        return huespedMapper.entityToResponse(huesped);
 	}
 	
 	@Override
@@ -92,13 +100,6 @@ public class HuespedServiceImpl implements HuespedService {
 		log.info("Buscando huesped activo con id: " + id);
 		return huespedRepository.findByIdAndEstadoRegistro(id, EstadoRegistro.ACTIVO).orElseThrow(
 				() -> new NoSuchElementException("No se encotro un huesped activo con el id: "+ id));
-	}
-	
-	/*---------Obtener huesped sin importar estado por id------------*/
-	private Huesped getHuespedOrThrowSinEstado(Long id) {
-		log.info("Buscando huesped activo con id: " + id);
-		return huespedRepository.findById(id).orElseThrow(
-				() -> new NoSuchElementException("No se encotro un huesped con el id: "+ id));
 	}
 	
 	/*---------verificar datos unicos al registrar---------------*/
