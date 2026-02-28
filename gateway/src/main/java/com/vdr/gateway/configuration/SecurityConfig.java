@@ -16,6 +16,12 @@ import org.springframework.web.cors.CorsConfiguration;
 @Configuration
 @EnableMethodSecurity //intento v
 public class SecurityConfig {
+
+    private final ReactiveJwtAuthenticationConverterAdapter reactiveJwtAuthenticationConverterAdapter;
+
+    SecurityConfig(ReactiveJwtAuthenticationConverterAdapter reactiveJwtAuthenticationConverterAdapter) {
+        this.reactiveJwtAuthenticationConverterAdapter = reactiveJwtAuthenticationConverterAdapter;
+    }
 	
 	@Bean
 	SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -29,7 +35,7 @@ public class SecurityConfig {
 				corsConfiguration.setAllowCredentials(true);
 				return corsConfiguration;
 			})).authorizeExchange(exchange -> exchange
-				     /*/.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+				    .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 					.pathMatchers(HttpMethod.GET, "/api/reservaciones/eliminadas").hasRole("ADMIN")
 					.pathMatchers(HttpMethod.GET, "/api/reservaciones/id-reservacion/{id}").hasRole("ADMIN")
 					.pathMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "USER")
@@ -37,8 +43,8 @@ public class SecurityConfig {
 					.pathMatchers(HttpMethod.PUT, "/api/habitaciones/{id}").hasRole("ADMIN")
 					.pathMatchers(HttpMethod.PUT, "/**").hasAnyRole("ADMIN", "USER")
 					.pathMatchers(HttpMethod.PATCH, "/**").hasAnyRole("ADMIN", "USER")
-					.pathMatchers(HttpMethod.DELETE, "/**").hasRole("ADMIN")/*/
-					.anyExchange().permitAll())
+					.pathMatchers(HttpMethod.DELETE, "/**").hasRole("ADMIN")
+					.anyExchange().authenticated())
 			.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
 				jwt.jwtAuthenticationConverter(reactiveJwtAuthenticationConverterAdapter())));
 		
