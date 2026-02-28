@@ -154,26 +154,9 @@ public class HabitacionServiceImpl implements HabitacionService{
 				
 		}
 		
-		static final Map<EstadoHabitacion, List<EstadoHabitacion>> cambiosDisponibles = Map.of(
-				EstadoHabitacion.DISPONIBLE, List.of(
-						EstadoHabitacion.OCUPADA,
-						EstadoHabitacion.MANTENIMIENTO,
-						EstadoHabitacion.LIMPIEZA),
-				EstadoHabitacion.OCUPADA, List.of(
-						EstadoHabitacion.MANTENIMIENTO,
-						EstadoHabitacion.LIMPIEZA),
-				EstadoHabitacion.MANTENIMIENTO, List.of(
-						EstadoHabitacion.LIMPIEZA),
-				EstadoHabitacion.LIMPIEZA, List.of(
-						EstadoHabitacion.DISPONIBLE)
-		);
 		private void verificarEstadoTransicionHabitacion(EstadoHabitacion estadoActual,EstadoHabitacion estadoNuevo) {
-			List<EstadoHabitacion> cambiosDis = cambiosDisponibles.getOrDefault(estadoActual, List.of());
+			estadoActual.puedeCambiarA(estadoNuevo);
 			
-			if(!cambiosDis.contains(estadoNuevo)) {
-				throw new ReglaDeNegocioInvalidaException("No se puede pasar de " + estadoActual + " a "
-						+ estadoNuevo);
-			}
 		}
 		
 		
