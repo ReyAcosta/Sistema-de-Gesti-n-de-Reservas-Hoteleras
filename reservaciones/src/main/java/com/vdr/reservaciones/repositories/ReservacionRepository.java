@@ -1,11 +1,11 @@
 package com.vdr.reservaciones.repositories;
 
 import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -23,6 +23,9 @@ public interface ReservacionRepository extends JpaRepository<Reservacion, Long> 
 	
 	boolean existsByIdHuespedAndEstadoRegistroAndEstadoReserva(Long idHuesped, EstadoRegistro estadoRegistro, EstadoReserva estadoReserva);
 	
+	boolean existsByIdHabitacionAndEstadoRegistro(Long idHuesped, EstadoRegistro estadoRegistro);
+	
+	boolean existsByIdHuespedAndEstadoRegistro(Long idHuesped, EstadoRegistro estadoRegistro);
 	@Query(value=""" 
 			SELECT COUNT(*) 
 			FROM RESERVACIONES R
@@ -40,4 +43,6 @@ public interface ReservacionRepository extends JpaRepository<Reservacion, Long> 
 			@Param("estadoRegistro")String estadoRegistro,
 			@Param("estadoReserva")String estadoReserva);
 	
+	
+	Optional<Reservacion> findByIdHuespedAndEstadoRegistro(Long idHuesped, EstadoRegistro estadoRegistro);
 }

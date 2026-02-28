@@ -22,10 +22,6 @@ public final class ReservacionValidator {
 	);
 	
 	public void verificarEstadoReserva(EstadoReserva estadoActual, EstadoReserva estadoNuevo) {
-		log.info("estado actual: {}, estado nuevo: {}", estadoActual, estadoNuevo);
-		
-		log.info("Clase estadoActual: {}", estadoActual.getClass().getName());
-		log.info("Clase enum del map: {}", EstadoReserva.EN_CURSO.getClass().getName());
 		
 		if(estadoActual.equals(estadoNuevo)) {
 			throw new ReglaDeNegocioInvalidaException("La reservacion ya se encuentra en estado " + estadoNuevo);

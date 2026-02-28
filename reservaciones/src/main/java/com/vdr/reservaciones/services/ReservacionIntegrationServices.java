@@ -6,6 +6,7 @@ import com.vdr.common_reservaciones.clients.HabitacionClient;
 import com.vdr.common_reservaciones.clients.HuespedClient;
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
+import com.vdr.common_reservaciones.enums.EstadoHabitacion;
 import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
 import com.vdr.reservaciones.dtos.ReservacionRequest;
 import com.vdr.reservaciones.entities.Reservacion;
@@ -37,14 +38,14 @@ public class ReservacionIntegrationServices {
 	}
 	
 	
-	private void cambioEstadoHabitacion(Long idHabitacion, Long idEstadoHabitacion) {
-		habitacionClient.actualizarEstadoHabitacionSinRestriccion(idHabitacion, idEstadoHabitacion);
+	public void cambioEstadoHabitacion(Long idHabitacion, EstadoHabitacion estadoHabitacion) {
+		habitacionClient.actualizarEstadoHabitacion(idHabitacion, estadoHabitacion);
 	}
 	
 	
-	public void cambiarEstadoConformeReserva(EstadoReserva estadoReserva,Long idHabitacion) {
+	public void cambiarEstadoHabitacionSireservaEliminada(Long idHabitacion, EstadoReserva estadoReserva) {
 		if(estadoReserva.equals(EstadoReserva.FINALIZADA)) {
-			cambioEstadoHabitacion(idHabitacion, 1L);
+			cambioEstadoHabitacion(idHabitacion, EstadoHabitacion.DISPONIBLE );
 		}
 	}
 	
@@ -59,11 +60,7 @@ public class ReservacionIntegrationServices {
 	public HabitacionResponse obtenerHabitacionPorIdSinEstado(Long idHabitacion) {
 		return habitacionClient.obtenerPorIdSinEstado(idHabitacion);
 	}
-	
-	public void actualizarEstadoHabitacionSinRestriccion(Long idHabitacion, Long idEstadoHabitacion) {
-		habitacionClient.actualizarEstadoHabitacionSinRestriccion(idHabitacion, idEstadoHabitacion);
-	}
-	
+		
 	
 	/*--------------huesped--------------*/
 	public HuespedResponse obtenerHuespedPorId(Long idHuesped) {
@@ -73,8 +70,5 @@ public class ReservacionIntegrationServices {
 	public HuespedResponse obtenerHuespedPorIdSinEstado(Long idHuesped) {
 		return huespedClient.obtenerPorIdSinEstado(idHuesped);
 	}
-	
-	
-	/*---------------Reservaciones-----------------*/
 		
 }
