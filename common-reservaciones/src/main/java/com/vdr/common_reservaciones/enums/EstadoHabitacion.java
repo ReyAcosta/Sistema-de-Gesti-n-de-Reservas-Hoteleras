@@ -1,5 +1,7 @@
 package com.vdr.common_reservaciones.enums;
 
+import com.vdr.common_reservaciones.exceptions.ReglaDeNegocioInvalidaException;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -34,4 +36,36 @@ public enum EstadoHabitacion {
             "Descripción de la habitación no válida: " + descripcion
         );
     }
+    
+    
+    public boolean puedeCambiarA(EstadoHabitacion nuevoEstado) {
+	    return switch (this) {
+
+	        case DISPONIBLE ->
+	          		nuevoEstado == OCUPADA || nuevoEstado == MANTENIMIENTO || nuevoEstado == LIMPIEZA;
+	        case OCUPADA ->
+	                nuevoEstado == LIMPIEZA || nuevoEstado == MANTENIMIENTO;
+	        case LIMPIEZA ->
+	                nuevoEstado == DISPONIBLE;
+	        case MANTENIMIENTO ->
+            		nuevoEstado == LIMPIEZA;
+	    };
+	}
+    
+    
+    public void validarTransicion(EstadoHabitacion nuevoEstado) {
+
+	    if (this == nuevoEstado) {
+	        throw new ReglaDeNegocioInvalidaException("La cita ya se encuentra en estado: " + this);
+	    }
+
+	    if (!puedeCambiarA(nuevoEstado)) {
+	        throw new ReglaDeNegocioInvalidaException(
+	                "No se puede cambiar el estado de " + this + " a " + nuevoEstado
+	        );
+	    }
+	}
+    
+    
+    
 }
