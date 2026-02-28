@@ -23,6 +23,8 @@ public interface ReservacionRepository extends JpaRepository<Reservacion, Long> 
 	
 	boolean existsByIdHuespedAndEstadoRegistroAndEstadoReserva(Long idHuesped, EstadoRegistro estadoRegistro, EstadoReserva estadoReserva);
 	
+	boolean existsByIdHabitacionAndEstadoRegistro(Long idHuesped, EstadoRegistro estadoRegistro);
+	
 	boolean existsByIdHuespedAndEstadoRegistro(Long idHuesped, EstadoRegistro estadoRegistro);
 	@Query(value=""" 
 			SELECT COUNT(*) 

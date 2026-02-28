@@ -12,5 +12,8 @@ public interface ReservaClient {
 
 	@GetMapping("reservacion/id-huesped/{idHuesped}")
 	Void eliminarReservacionSiHuespedEliminado(@PathVariable Long idHuesped);
+	
+	@GetMapping("/id-habitacion/{idhabitacion}/reservas-activas")
+	Boolean habitacionTieneReservacionesActivas(@PathVariable Long idhabitacion);
 }
     

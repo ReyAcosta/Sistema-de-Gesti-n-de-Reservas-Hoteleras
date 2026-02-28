@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
+import com.vdr.common_reservaciones.enums.EstadoHabitacion;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
 import com.vdr.reservaciones.dtos.ReservacionRequest;
@@ -87,7 +88,7 @@ public class ReservacionServiceImpl implements ReservacionService{
         Reservacion reservacion = reservacionMapper.requestToEntity(request);
         Reservacion guardada = reservacionRepository.save(reservacion);
         
-        servicesClients.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 2L);
+        servicesClients.cambioEstadoHabitacion(reservacion.getIdHabitacion(), EstadoHabitacion.OCUPADA);
         
 
         return reservacionMapper.entityToResponse(guardada, huesped, habitacion);
@@ -118,12 +119,9 @@ public class ReservacionServiceImpl implements ReservacionService{
 		Reservacion reserva = getReservacionOrThrow(idReserva);
 		EstadoReserva estado = EstadoReserva.fromCodigo(idEstadoReserva);
 		validar.verificarEstadoReserva(reserva.getEstadoReserva(), estado);
-		
-		
-		servicesClients.cambiarEstadoConformeReserva(estado, reserva.getIdHabitacion());
+		servicesClients.cambiarEstadoHabitacionSireservaEliminada(reserva.getIdHabitacion(),estado);
 		
 		reserva.setEstadoReserva(estado);
-		
 		return reservacionMapper.entityToResponse(reserva,
 				getHuespedResponse(reserva.getIdHuesped()),
 				getHabitacionResponse(reserva.getIdHabitacion()));
@@ -135,8 +133,13 @@ public class ReservacionServiceImpl implements ReservacionService{
 		log.info("Eliminando reservación con id: {}", id);
         Reservacion reservacion = getReservacionOrThrow(id);
         
-        servicesClients.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 1L);
-        reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
+        if(reservacion.getEstadoReserva().equals(EstadoReserva.EN_CURSO)) {
+        	throw new IllegalArgumentException("No se puede eliminar una reserva en curso");
+        }
+        
+        servicesClients.cambioEstadoHabitacion(reservacion.getIdHabitacion(), EstadoHabitacion.DISPONIBLE);
+        
+        reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);        
 	}
 	
 	
@@ -154,12 +157,17 @@ public class ReservacionServiceImpl implements ReservacionService{
 	}
 	
 	@Override
+	public boolean habitacionesTieneReservacionesActivas(Long idHabitacion) {
+		return reservacionRepository.existsByIdHabitacionAndEstadoRegistro(idHabitacion, EstadoRegistro.ACTIVO);
+	}
+	
+	@Override
 	public void eliminarReservacionSiHuespedEliminado(Long idHuesped) {
 		Reservacion reservacion = reservacionRepository.findByIdHuespedAndEstadoRegistro(idHuesped, EstadoRegistro.ACTIVO).orElseThrow(
 				()-> new NoSuchElementException("No se encontro reservacion ligada al huesped"));
 		
 		reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
-		servicesClients.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 1L);
+		servicesClients.cambioEstadoHabitacion(reservacion.getIdHabitacion(), EstadoHabitacion.DISPONIBLE);
 	      
 	}
 	
