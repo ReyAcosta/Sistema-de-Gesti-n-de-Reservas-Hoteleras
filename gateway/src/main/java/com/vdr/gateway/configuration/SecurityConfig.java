@@ -36,6 +36,7 @@ public class SecurityConfig {
 				return corsConfiguration;
 			})).authorizeExchange(exchange -> exchange
 				    .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+				     .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 					.pathMatchers(HttpMethod.GET, "/api/reservaciones/eliminadas").hasRole("ADMIN")
 					.pathMatchers(HttpMethod.GET, "/api/reservaciones/id-reservacion/{id}").hasRole("ADMIN")
 					.pathMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "USER")

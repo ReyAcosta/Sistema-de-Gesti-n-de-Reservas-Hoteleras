@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
 import com.vdr.common_reservaciones.dtos.huespedes.HuespedResponse;
+import com.vdr.common_reservaciones.enums.EstadoHabitacion;
 import com.vdr.common_reservaciones.enums.EstadoRegistro;
 import com.vdr.common_reservaciones.exceptions.EntidadRelacionadaException;
 import com.vdr.reservaciones.dtos.ReservacionRequest;
@@ -27,7 +28,8 @@ public class ReservacionServiceImpl implements ReservacionService{
 	private final ReservacionIntegrationServices servicesClients;
 	private final ReservacionValidator validar;
 	
-
+	
+/*---------------------------listar reservaciones----------------------------------*/
 	@Override
 	@Transactional(readOnly = true)
 	public List<ReservacionResponse> listar() {
@@ -42,14 +44,14 @@ public class ReservacionServiceImpl implements ReservacionService{
 	@Override
 	@Transactional(readOnly = true)
 	public List<ReservacionResponse> listarEliminadas() {
-		return reservacionRepository.findAll().stream()
+		return reservacionRepository.findByEstadoRegistro(EstadoRegistro.ELIMINADO).stream()
 				.map(reserva -> reservacionMapper.entityToResponse(
 						reserva,
 						getHuespedResponseSinEstado(reserva.getIdHuesped()),
 						getHabitacionResponseSinEstado(reserva.getIdHabitacion()) )).toList() ;		
 	}
 
-
+/*-----------------------------obtener por id--------------------*/
 	@Override
 	@Transactional(readOnly = true)
 	public ReservacionResponse obtenerPorId(Long id) {
@@ -64,25 +66,31 @@ public class ReservacionServiceImpl implements ReservacionService{
 	@Override
 	@Transactional(readOnly = true)
 	public ReservacionResponse obtenerPorIdSinEstado(Long id) {
-		Reservacion reservacion = getReservacionOrThrowSinEstado													(id);
+		Reservacion reservacion = reservacionRepository.findById(id).orElseThrow(
+				()-> new NoSuchElementException("No se econtro reservacion con id: " + id));
 		
 		return reservacionMapper.entityToResponse(reservacion,
 				getHuespedResponseSinEstado(reservacion.getIdHuesped()),
 				getHabitacionResponseSinEstado(reservacion.getIdHabitacion()));
 	}	
 	
-
+/*------------actualizar-------------------*/
 	@Override
 	public ReservacionResponse registrar(ReservacionRequest request) {
 		log.info("Registrando nueva reservación");
 		HuespedResponse huesped =getHuespedResponse(request.idHuesped());
-		servicesClients.validarEstadoHabitacion(request.idHabitacion());
 		HabitacionResponse habitacion = servicesClients.obtenerHabitacionPorId(request.idHabitacion());
+		if(reservacionRepository.existsByIdHuespedAndEstadoRegistro(huesped.id(), EstadoRegistro.ACTIVO)) {
+			throw new IllegalArgumentException("El huesped ya tiene reservacion activa");
+		}
+		servicesClients.validarEstadoHabitacion(habitacion.id());
+		validar.verificarFechaInicioFechaFin(request.fechaInicio(), request.fechaFin());
+//		verificarSiHorarioCruzado(request);
 		
         Reservacion reservacion = reservacionMapper.requestToEntity(request);
         Reservacion guardada = reservacionRepository.save(reservacion);
         
-        servicesClients.actualizarEstadoHabitacionSinRestriccion(reservacion.getIdHabitacion(), 2L);
+        servicesClients.cambioEstadoHabitacion(reservacion.getIdHabitacion(), EstadoHabitacion.OCUPADA);
         
 
         return reservacionMapper.entityToResponse(guardada, huesped, habitacion);
@@ -97,6 +105,7 @@ public class ReservacionServiceImpl implements ReservacionService{
 	        
 	        validar.verificarCambiosEstadoReserva(request, reservacion);
 	        servicesClients.verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
+//	        verificarSiHorarioCruzado(request);
 	        
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
@@ -112,24 +121,27 @@ public class ReservacionServiceImpl implements ReservacionService{
 		Reservacion reserva = getReservacionOrThrow(idReserva);
 		EstadoReserva estado = EstadoReserva.fromCodigo(idEstadoReserva);
 		validar.verificarEstadoReserva(reserva.getEstadoReserva(), estado);
-		
-		
-		servicesClients.cambiarEstadoConformeReserva(estado, reserva.getIdHabitacion());
+		servicesClients.cambiarEstadoHabitacionSireservaEliminada(reserva.getIdHabitacion(),estado);
 		
 		reserva.setEstadoReserva(estado);
-		
 		return reservacionMapper.entityToResponse(reserva,
 				getHuespedResponse(reserva.getIdHuesped()),
 				getHabitacionResponse(reserva.getIdHabitacion()));
 	}
 	
-
+/*---------------------------Eliminar-------------------------------*/
 	@Override
 	public void eliminar(Long id) {
 		log.info("Eliminando reservación con id: {}", id);
         Reservacion reservacion = getReservacionOrThrow(id);
         
-        reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
+        if(reservacion.getEstadoReserva().equals(EstadoReserva.EN_CURSO)) {
+        	throw new IllegalArgumentException("No se puede eliminar una reserva en curso");
+        }
+        
+        servicesClients.cambioEstadoHabitacion(reservacion.getIdHabitacion(), EstadoHabitacion.DISPONIBLE);
+        
+        reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);        
 	}
 	
 	
@@ -146,18 +158,27 @@ public class ReservacionServiceImpl implements ReservacionService{
 				
 	}
 	
+	@Override
+	public boolean habitacionesTieneReservacionesActivas(Long idHabitacion) {
+		return reservacionRepository.existsByIdHabitacionAndEstadoRegistro(idHabitacion, EstadoRegistro.ACTIVO);
+	}
+	
+	@Override
+	public void eliminarReservacionSiHuespedEliminado(Long idHuesped) {
+		Reservacion reservacion = reservacionRepository.findByIdHuespedAndEstadoRegistro(idHuesped, EstadoRegistro.ACTIVO).orElseThrow(
+				()-> new NoSuchElementException("No se encontro reservacion ligada al huesped"));
+		
+		reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
+		servicesClients.cambioEstadoHabitacion(reservacion.getIdHabitacion(), EstadoHabitacion.DISPONIBLE);
+	      
+	}
+	
 	/*-------------------Comienzan metodos privados-----------*/
 	
 	private Reservacion getReservacionOrThrow(Long id) {
 		log.info("Buscando reservacion activa por id: {}",id);
 		return reservacionRepository.findByIdAndEstadoRegistro(id, EstadoRegistro.ACTIVO).orElseThrow(
 				()-> new NoSuchElementException("No se econtro reservacion activa con id: " + id));
-	}
-	
-	private Reservacion getReservacionOrThrowSinEstado(Long id) {
-		log.info("Buscando reservacion activa por id: {}",id);
-		return reservacionRepository.findById(id).orElseThrow(
-				()-> new NoSuchElementException("No se econtro reservacion con id: " + id));
 	}
 	
 	private HabitacionResponse getHabitacionResponse(Long id) {
@@ -176,5 +197,12 @@ public class ReservacionServiceImpl implements ReservacionService{
 		return servicesClients.obtenerHuespedPorIdSinEstado(id);
 	}
 
+//	private void verificarSiHorarioCruzado(ReservacionRequest request) {
+//		if(reservacionRepository.chocaHorario(request.fechaInicio(),
+//				request.fechaFin(), request.idHabitacion(), EstadoRegistro.ACTIVO.toString(), EstadoReserva.CONFIRMADA.toString() ) > 0) {
+//			throw new IllegalArgumentException("La habitacion con id: " + request.idHabitacion() +
+//					"se encuentra ocupada");
+//		}
+//	}
 
 }

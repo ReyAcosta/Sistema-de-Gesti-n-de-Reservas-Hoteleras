@@ -18,11 +18,11 @@ public record ReservacionRequest(
 	    Long idHabitacion,
 
 	    @NotNull(message = "La fecha de reserva es obligatoria")
-	    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
+	   
 	    LocalDateTime fechaInicio,
 	    
 	    @NotNull(message = "La fecha de reserva es obligatoria")
-	    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
+	    
 	    LocalDateTime fechaFin
 	    
 	) {}

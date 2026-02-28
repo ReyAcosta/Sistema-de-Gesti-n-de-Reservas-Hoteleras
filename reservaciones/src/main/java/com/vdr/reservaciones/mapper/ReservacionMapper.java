@@ -82,11 +82,12 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 		if (huesped == null) return null;
 		
 		return new HuespedData(
-				huesped.nombre(),
-			    huesped.email(),
-			    huesped.telefono(),
-			    huesped.tipoDocumento(),
-			    huesped.nacionalidad()
+				huesped.id(),
+				String.join(" ", 
+						huesped.nombre(),
+						huesped.apellidoPaterno(),
+						huesped.apellidoMaterno()
+						)
 				);
 	}
 	private HabitacionData datosHabitacionFromHabitacionResponse(HabitacionResponse habitacion) {
@@ -94,11 +95,9 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 		 if (habitacion == null) return null;
 
 		    return new HabitacionData(
+		    		habitacion.id(),
 		    		habitacion.numeroHabitacion(),
-		    	    habitacion.tipoHabitacion(),
-		    	    habitacion.precio(),
-		    	    habitacion.capacidad(),
-		    	    habitacion.estadoHabitacion()
+		    	    habitacion.tipoHabitacion()
 		        );
 		    
 }

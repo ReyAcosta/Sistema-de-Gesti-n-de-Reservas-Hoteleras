@@ -10,11 +10,8 @@ public record ReservacionResponse(
 	Long id, 
 	HabitacionData habitacion,
 	HuespedData huesped,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern= "dd/MM/yyyy HH:mm")
 	LocalDateTime fechaReserva,
-	 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern= "dd/MM/yyyy HH:mm")
-	LocalDateTime fechaInicio,
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern= "dd/MM/yyyy HH:mm")
+	LocalDateTime fechaInicio,	
 	LocalDateTime fechaFin,
 	String estadoReserva
 	

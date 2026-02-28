@@ -22,10 +22,6 @@ public final class ReservacionValidator {
 	);
 	
 	public void verificarEstadoReserva(EstadoReserva estadoActual, EstadoReserva estadoNuevo) {
-		log.info("estado actual: {}, estado nuevo: {}", estadoActual, estadoNuevo);
-		
-		log.info("Clase estadoActual: {}", estadoActual.getClass().getName());
-		log.info("Clase enum del map: {}", EstadoReserva.EN_CURSO.getClass().getName());
 		
 		if(estadoActual.equals(estadoNuevo)) {
 			throw new ReglaDeNegocioInvalidaException("La reservacion ya se encuentra en estado " + estadoNuevo);
@@ -45,7 +41,7 @@ public final class ReservacionValidator {
 	}
 	
 	
-	private void verificarFechaInicioFechaFin(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+	public void verificarFechaInicioFechaFin(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
 		if(fechaInicio.isAfter(fechaFin)) {
 			throw new IllegalArgumentException("La fecha de inicio no puede ser despue de la de fin");
 		}
@@ -74,5 +70,6 @@ public final class ReservacionValidator {
 					+ "ya no esta en estado confirmada");}
 			
 	}
+	
 
 }

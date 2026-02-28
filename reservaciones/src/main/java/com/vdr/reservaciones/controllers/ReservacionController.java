@@ -25,9 +25,9 @@ public class ReservacionController extends CommonController<ReservacionRequest, 
 	public ResponseEntity<List<ReservacionResponse>> listarEliminadas(){
 		return ResponseEntity.ok(service.listarEliminadas());
 	}
-	
+
 	@GetMapping("/id-reservacion/{id}")
-	public ResponseEntity<ReservacionResponse> listarEliminadas(@PathVariable Long id){
+	public ResponseEntity<ReservacionResponse> obtenerEliminada(@PathVariable Long id){
 		return ResponseEntity.ok(service.obtenerPorIdSinEstado(id));
 	}
 	
@@ -40,6 +40,18 @@ public class ReservacionController extends CommonController<ReservacionRequest, 
 	@GetMapping("/id-huesped/{idHuesped}/reservas-activas")
 	public ResponseEntity<Void> huespedTieneConsultasConfirmadasEnCurso(@PathVariable Long idHuesped){
 		service.huespedTieneConsultasConfirmadasEnCurso(idHuesped);
+		return ResponseEntity.ok().build();
+	}
+	
+	@GetMapping("/id-habitacion/{idhabitacion}/reservas-activas")
+	public ResponseEntity<Boolean> habitacionTieneReservacionesActivas(@PathVariable Long idhabitacion){
+		
+		return ResponseEntity.ok(service.habitacionesTieneReservacionesActivas(idhabitacion));
+	}
+	
+	@GetMapping("reservacion/id-huesped/{idHuesped}")
+	public ResponseEntity<Void> eliminarReservacionSiHuespedEliminado(@PathVariable Long idHuesped){
+		service.eliminarReservacionSiHuespedEliminado(idHuesped);
 		return ResponseEntity.ok().build();
 	}
 }

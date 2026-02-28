@@ -2,6 +2,7 @@ package com.vdr.habitaciones.controller;
 
 import org.springframework.http.ResponseEntity;
 
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vdr.common_reservaciones.controllers.CommonController;
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionRequest;
 import com.vdr.common_reservaciones.dtos.habitaciones.HabitacionResponse;
+import com.vdr.common_reservaciones.enums.EstadoHabitacion;
 import com.vdr.habitaciones.services.HabitacionService;
 
 
@@ -30,13 +32,13 @@ public class HabitacionController extends CommonController<HabitacionRequest, Ha
 	@PatchMapping("/{id}/estado/{idEstado}")
 	public ResponseEntity<HabitacionResponse> actualizarEstadoHabitacion(@PathVariable Long id,
 																		@PathVariable Long idEstado){
-		return ResponseEntity.ok(service.actualizarEstadoHabitacion(id, idEstado, false));
+		return ResponseEntity.ok(service.actualizarEstadoHabitacion(id, idEstado));
 	}
 	
-	@PutMapping("/{id}/estado/{idEstado}")
-	public ResponseEntity<HabitacionResponse> actualizarEstadoHabitacionSinRestriccion(@PathVariable Long id,
-																		@PathVariable Long idEstado){
-		return ResponseEntity.ok(service.actualizarEstadoHabitacion(id, idEstado, true));
+	@PutMapping("/{id}/estado/{estado}")
+	public ResponseEntity<HabitacionResponse> actualizarEstadoHabitacionPut(@PathVariable Long id,
+																		@PathVariable EstadoHabitacion estado ){
+		return ResponseEntity.ok(service.actualizarEstadoHabitacionPut(id, estado));
 	}
 	
 	@GetMapping("/{id}/validaEstado")
