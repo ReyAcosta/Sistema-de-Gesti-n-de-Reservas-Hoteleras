@@ -77,7 +77,7 @@ public class HabitacionServiceImpl implements HabitacionService{
 		Habitacion habitacion = getHabitacionOrThrow(idHabitacion);
 		EstadoHabitacion estado = EstadoHabitacion.fromCodigo(idEstadoHabitacion); 
 		if(reservaClient.habitacionTieneReservacionesActivas(idHabitacion)) {
-			verificarEstadoTransicionHabitacion(habitacion.getEstadoHabitacion(), estado);
+			habitacion.getEstadoHabitacion().validarTransicion(estado);
 		}
 		habitacion.setEstadoHabitacion(estado);
 		return habitacionMapper.entityToResponse(habitacion);
@@ -153,14 +153,7 @@ public class HabitacionServiceImpl implements HabitacionService{
 				}
 				
 		}
-		
-		private void verificarEstadoTransicionHabitacion(EstadoHabitacion estadoActual,EstadoHabitacion estadoNuevo) {
-			estadoActual.puedeCambiarA(estadoNuevo);
-			
-		}
-		
-		
-		
+
 		
 		
 }
