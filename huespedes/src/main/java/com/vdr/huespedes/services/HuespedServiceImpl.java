@@ -40,6 +40,14 @@ public class HuespedServiceImpl implements HuespedService {
 	
 	@Override
 	@Transactional(readOnly = true)
+	public List<HuespedResponse> listarEliminadas() {
+		log.info("Listando reservaciones activas");
+        return huespedRepository.findByEstadoRegistro(EstadoRegistro.ELIMINADO).stream()
+                .map(huespedMapper::entityToResponse).toList();		
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
 	public HuespedResponse obtenerPorId(Long id) {
         return huespedMapper.entityToResponse(getHuespedOrThrow(id));
 	}
@@ -82,7 +90,7 @@ public class HuespedServiceImpl implements HuespedService {
 	public void eliminar(Long id) {
 		log.info("Intentando eliminar huésped con id: {}", id);
 		 Huesped huesped = getHuespedOrThrow(id);
-		 reservaClient.huespedTieneReservasActivas(id);
+		 reservaClient.huespedTieneConsultasConfirmadasEnCurso(id);
 			
 			log.info("Eliminando paciente con id {}", id);
 	        

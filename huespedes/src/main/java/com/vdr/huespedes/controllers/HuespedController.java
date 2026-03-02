@@ -1,5 +1,10 @@
 package com.vdr.huespedes.controllers;
 
+
+
+
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +25,11 @@ public class HuespedController extends CommonController<HuespedRequest, HuespedR
 	@GetMapping("/id-huesped/{id}")
 	public ResponseEntity<HuespedResponse> obtenerPorIdSinEstado(@PathVariable Long id){
 		return ResponseEntity.ok(service.obtenerPorIdSinEstado(id));
+	}
+	
+	@GetMapping("/eliminadas")
+	public ResponseEntity<List<HuespedResponse>> listarEliminadas(){
+		return ResponseEntity.ok(service.listarEliminadas());
 	}
 
 }

@@ -165,8 +165,11 @@ public class ReservacionServiceImpl implements ReservacionService{
 	
 	@Override
 	public void eliminarReservacionSiHuespedEliminado(Long idHuesped) {
-		Reservacion reservacion = reservacionRepository.findByIdHuespedAndEstadoRegistro(idHuesped, EstadoRegistro.ACTIVO).orElseThrow(
-				()-> new NoSuchElementException("No se encontro reservacion ligada al huesped"));
+	
+		Reservacion reservacion = reservacionRepository.findByIdHuespedAndEstadoRegistro(idHuesped, EstadoRegistro.ACTIVO)
+				.orElse(null);
+		
+		if(reservacion == null) return;
 		
 		reservacion.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 		servicesClients.cambioEstadoHabitacion(reservacion.getIdHabitacion(), EstadoHabitacion.DISPONIBLE);

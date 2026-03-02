@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface ReservaClient {
 	
 	@GetMapping("/id-huesped/{idHuesped}/reservas-activas")
-	Void huespedTieneReservasActivas(@PathVariable Long idHuesped);
+	Void huespedTieneConsultasConfirmadasEnCurso(@PathVariable Long idHuesped);
 
 	@GetMapping("reservacion/id-huesped/{idHuesped}")
 	Void eliminarReservacionSiHuespedEliminado(@PathVariable Long idHuesped);
