@@ -19,8 +19,7 @@ public class ReservacionController extends CommonController<ReservacionRequest, 
 	public ReservacionController(ReservacionService service) {
 		super(service);
 	}
-	
-	@GetMapping("/eliminadas")
+	@GetMapping("/eliminadas") 
 	public ResponseEntity<List<ReservacionResponse>> listarEliminadas(){
 		return ResponseEntity.ok(service.listarEliminadas());
 	}

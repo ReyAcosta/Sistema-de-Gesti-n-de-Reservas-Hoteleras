@@ -1,8 +1,5 @@
 package com.vdr.huespedes.controllers;
 
-
-
-
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -21,15 +18,14 @@ public class HuespedController extends CommonController<HuespedRequest, HuespedR
 	public HuespedController(HuespedService service) {
 		super(service);
 	}
-	
+	@GetMapping("/eliminados") 
+	public ResponseEntity<List<HuespedResponse>> listarEliminados(){
+		return ResponseEntity.ok(service.listarEliminados());
+	}
+
 	@GetMapping("/id-huesped/{id}")
 	public ResponseEntity<HuespedResponse> obtenerPorIdSinEstado(@PathVariable Long id){
 		return ResponseEntity.ok(service.obtenerPorIdSinEstado(id));
-	}
-	
-	@GetMapping("/eliminadas")
-	public ResponseEntity<List<HuespedResponse>> listarEliminadas(){
-		return ResponseEntity.ok(service.listarEliminadas());
 	}
 
 }

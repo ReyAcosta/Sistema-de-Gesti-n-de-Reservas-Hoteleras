@@ -37,14 +37,15 @@ public class HuespedServiceImpl implements HuespedService {
         return huespedRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO).stream()
                 .map(huespedMapper::entityToResponse).toList();		
 	}
-	
 	@Override
 	@Transactional(readOnly = true)
-	public List<HuespedResponse> listarEliminadas() {
-		log.info("Listando reservaciones activas");
-        return huespedRepository.findByEstadoRegistro(EstadoRegistro.ELIMINADO).stream()
-                .map(huespedMapper::entityToResponse).toList();		
+	public List<HuespedResponse>listarEliminados(){
+		return huespedRepository.findByEstadoRegistro(EstadoRegistro.ELIMINADO)
+	            .stream()
+	            .map(huespedMapper::entityToResponse)
+	            .toList();
 	}
+	
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -76,8 +77,16 @@ public class HuespedServiceImpl implements HuespedService {
 		 log.info("Actualizando reservación con id: {}", id);
 	        Huesped huesped = getHuespedOrThrow(id);
 	        
-	        verificarEmailUnicoActualizar(id, huesped.getEmail());
-	        verificarTelefonoUnicoActualizar(id, huesped.getTelefono());
+	        if(!request.email().equals(huesped.getEmail())) {
+	        	
+	        	verificarEmailUnico(request.email());
+	        	
+	        }
+	        if(!request.telefono().equals(huesped.getTelefono())) {
+	        	verificarTelefonoUnico(request.telefono());
+	        	
+	        }
+	        
 //	        verificarTipoDocumentoUnicoActualizar(id, huesped.getTipoDocumento());
 	        
 	        huespedMapper.updateEntityFromRequest(request, huesped);

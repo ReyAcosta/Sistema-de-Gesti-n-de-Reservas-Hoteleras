@@ -10,5 +10,6 @@ public interface HuespedService extends CrudService<HuespedRequest, HuespedRespo
 
 	HuespedResponse obtenerPorIdSinEstado(Long id);
 	
-	List<HuespedResponse> listarEliminadas();
+	List<HuespedResponse> listarEliminados();
+
 }
