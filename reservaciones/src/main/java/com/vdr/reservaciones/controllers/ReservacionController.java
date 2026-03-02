@@ -13,14 +13,12 @@ import com.vdr.common_reservaciones.controllers.CommonController;
 import com.vdr.reservaciones.dtos.ReservacionRequest;
 import com.vdr.reservaciones.dtos.ReservacionResponse;
 import com.vdr.reservaciones.services.ReservacionService;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 public class ReservacionController extends CommonController<ReservacionRequest, ReservacionResponse, ReservacionService> {
 	public ReservacionController(ReservacionService service) {
 		super(service);
 	}
-	@PreAuthorize("hasRole('ADMIN')") //Intento admin v
 	@GetMapping("/eliminadas") 
 	public ResponseEntity<List<ReservacionResponse>> listarEliminadas(){
 		return ResponseEntity.ok(service.listarEliminadas());

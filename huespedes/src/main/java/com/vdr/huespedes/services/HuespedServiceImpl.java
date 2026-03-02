@@ -37,6 +37,15 @@ public class HuespedServiceImpl implements HuespedService {
         return huespedRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO).stream()
                 .map(huespedMapper::entityToResponse).toList();		
 	}
+	@Override
+	@Transactional(readOnly = true)
+	public List<HuespedResponse>listarEliminados(){
+		return huespedRepository.findByEstadoRegistro(EstadoRegistro.ELIMINADO)
+	            .stream()
+	            .map(huespedMapper::entityToResponse)
+	            .toList();
+	}
+	
 	
 	@Override
 	@Transactional(readOnly = true)
