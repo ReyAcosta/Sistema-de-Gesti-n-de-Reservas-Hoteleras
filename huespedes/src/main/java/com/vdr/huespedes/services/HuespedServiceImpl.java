@@ -77,8 +77,16 @@ public class HuespedServiceImpl implements HuespedService {
 		 log.info("Actualizando reservación con id: {}", id);
 	        Huesped huesped = getHuespedOrThrow(id);
 	        
-	        verificarEmailUnicoActualizar(id, huesped.getEmail());
-	        verificarTelefonoUnicoActualizar(id, huesped.getTelefono());
+	        if(!request.email().equals(huesped.getEmail())) {
+	        	
+	        	verificarEmailUnico(request.email());
+	        	
+	        }
+	        if(!request.telefono().equals(huesped.getTelefono())) {
+	        	verificarTelefonoUnico(request.telefono());
+	        	
+	        }
+	        
 //	        verificarTipoDocumentoUnicoActualizar(id, huesped.getTipoDocumento());
 	        
 	        huespedMapper.updateEntityFromRequest(request, huesped);
