@@ -1,5 +1,8 @@
 package com.vdr.reservaciones.services;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
@@ -87,7 +90,9 @@ public class ReservacionServiceImpl implements ReservacionService{
 		validar.verificarFechaInicioFechaFin(request.fechaInicio(), request.fechaFin());
 //		verificarSiHorarioCruzado(request);
 		
-        Reservacion reservacion = reservacionMapper.requestToEntity(request);
+		BigDecimal total = calcularTotal(request.fechaInicio(), request.fechaFin(), habitacion.precio());
+		
+        Reservacion reservacion = reservacionMapper.requestToEntity(request, total);
         Reservacion guardada = reservacionRepository.save(reservacion);
         
         servicesClients.cambioEstadoHabitacion(reservacion.getIdHabitacion(), EstadoHabitacion.OCUPADA);
@@ -102,10 +107,16 @@ public class ReservacionServiceImpl implements ReservacionService{
 		 log.info("Actualizando reservación con id: {}", id);
 
 	        Reservacion reservacion = getReservacionOrThrow(id);
+	        HabitacionResponse habitacion = getHabitacionResponse(id);
 	        
 	        validar.verificarCambiosEstadoReserva(request, reservacion);
 	        servicesClients.verificarCambiosHuespedHabitacionEnReserva(request, reservacion);
 //	        verificarSiHorarioCruzado(request);
+	        if(reservacion.getFechaInicio().equals(request.fechaInicio()) ||
+	        		reservacion.getFechaFin().equals(request.fechaFin())) {
+	        	BigDecimal total = calcularTotal(request.fechaInicio(), request.fechaFin(), habitacion.precio());
+	        	reservacionMapper.updateEntityFromRequest(request, reservacion, total);
+	        }
 	        
 	        reservacionMapper.updateEntityFromRequest(request, reservacion);
 
@@ -207,5 +218,13 @@ public class ReservacionServiceImpl implements ReservacionService{
 //					"se encuentra ocupada");
 //		}
 //	}
+	
+	private BigDecimal calcularTotal(LocalDateTime fechaInicio, LocalDateTime fechaFin, BigDecimal precioHabitacion) {
+
+		Long dias = fechaInicio.until(fechaFin,ChronoUnit.DAYS);
+		BigDecimal total = precioHabitacion.multiply(BigDecimal.valueOf(dias)) ; 
+		
+		return total;
+	}
 
 }

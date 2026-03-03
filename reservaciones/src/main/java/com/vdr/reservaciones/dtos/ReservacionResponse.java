@@ -1,5 +1,6 @@
 package com.vdr.reservaciones.dtos;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -13,6 +14,7 @@ public record ReservacionResponse(
 	LocalDateTime fechaReserva,
 	LocalDateTime fechaInicio,	
 	LocalDateTime fechaFin,
+	BigDecimal  total, 
 	String estadoReserva
 	
 ){}

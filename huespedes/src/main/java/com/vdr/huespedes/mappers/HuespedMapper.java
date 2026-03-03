@@ -39,7 +39,7 @@ public class HuespedMapper implements CommonMapper<HuespedRequest, HuespedRespon
                 .nombre(request.nombre())
                 .apellidoPaterno(request.apellidoPaterno())
                 .apellidoMaterno(request.apellidoMaterno())
-                .email(request.email())
+                .email(normalizarCorreo(request.email()))
                 .telefono(request.telefono())
                 .tipoDocumento(TipoDocumento.fromCodigo(request.idDocumento()))
                 .nacionalidad(Nacionalidad.fromCodigo(request.idNacionalidad()))
@@ -56,12 +56,26 @@ public class HuespedMapper implements CommonMapper<HuespedRequest, HuespedRespon
         entity.setNombre(request.nombre());
         entity.setApellidoPaterno(request.apellidoPaterno());
         entity.setApellidoMaterno(request.apellidoMaterno());
-        entity.setEmail(request.email());
+        entity.setEmail(normalizarCorreo(request.email()));
         entity.setTelefono(request.telefono());
         entity.setTipoDocumento(TipoDocumento.fromCodigo(request.idDocumento()));
         entity.setNacionalidad(Nacionalidad.fromCodigo(request.idNacionalidad()));
 
         return entity;
+	}
+	
+	private String normalizarCorreo(String correo) {
+		String correoNormalizado = correo.toLowerCase();
+		
+		correoNormalizado.replace("á", "a")
+			  .replace("é", "e")
+			  .replace("í", "i")
+			  .replace("ó", "o")
+			  .replace("ú", "u")
+			  .replace("ü", "u")
+			  .replace("ñ", "n");
+		
+		return correoNormalizado;
 	}
 
 }

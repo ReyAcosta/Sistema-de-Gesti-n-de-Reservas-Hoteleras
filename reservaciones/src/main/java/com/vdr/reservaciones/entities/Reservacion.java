@@ -1,5 +1,6 @@
 package com.vdr.reservaciones.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 
@@ -52,7 +53,9 @@ public class Reservacion{
 	    
 	    @Column(name = "FECHA_FIN")
 	    private LocalDateTime fechaFin;
-
+	    
+	    @Column(name = "PRECIO_RESERVA")
+	    private BigDecimal total;
 	
 	    @Column(name = "ESTADO_RESERVA", nullable = false)
         @Enumerated(EnumType.STRING)

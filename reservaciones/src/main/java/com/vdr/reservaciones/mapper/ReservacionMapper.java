@@ -1,5 +1,8 @@
 package com.vdr.reservaciones.mapper;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Component;
 
 import com.vdr.common_reservaciones.dtos.data.HabitacionData;
@@ -30,6 +33,7 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 				entity.getFechaReserva(),
 				entity.getFechaInicio(),
 				entity.getFechaFin(),
+				null,
 				entity.getEstadoReserva().getDescripcion());
 	}
 	
@@ -43,6 +47,7 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 				entity.getFechaReserva(),
 				entity.getFechaInicio(),
 				entity.getFechaFin(),
+				entity.getTotal(),
 				entity.getEstadoReserva().getDescripcion());
 	}
 
@@ -59,6 +64,20 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 				.estadoRegistro(EstadoRegistro.ACTIVO)
                 .build();
 	}
+	
+	public Reservacion requestToEntity(ReservacionRequest request,BigDecimal total) {
+		if (request == null) return null;
+
+        return Reservacion.builder()
+                .idHuesped(request.idHuesped())
+                .idHabitacion(request.idHabitacion())
+                .fechaInicio(request.fechaInicio())
+                .fechaFin(request.fechaFin())
+                .total(total)
+                .estadoReserva(EstadoReserva.CONFIRMADA)
+				.estadoRegistro(EstadoRegistro.ACTIVO)
+                .build();
+	}
 
 	@Override
 	public Reservacion updateEntityFromRequest(ReservacionRequest request, Reservacion entity) {
@@ -71,11 +90,11 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 
 	        return entity;
 	}
-	public Reservacion updateEntityFromRequest(ReservacionRequest request, Reservacion entity, EstadoReserva estadoReserva) {
+	public Reservacion updateEntityFromRequest(ReservacionRequest request, Reservacion entity,BigDecimal total) {
 		if(request == null || request == null) return null;
 		
 		updateEntityFromRequest(request, entity);
-		entity.setEstadoReserva(estadoReserva);
+		entity.setTotal(total);
 		return entity; 
 	}
 	private HuespedData datosHuespedFromHuespedResponse(HuespedResponse huesped) {
@@ -98,13 +117,8 @@ public class ReservacionMapper implements CommonMapper<ReservacionRequest, Reser
 		    		habitacion.id(),
 		    		habitacion.numeroHabitacion(),
 		    	    habitacion.tipoHabitacion()
-		        );
-		    
-}
+		        );	    
+	}
 	
-	
-	
-	
-
 }
 

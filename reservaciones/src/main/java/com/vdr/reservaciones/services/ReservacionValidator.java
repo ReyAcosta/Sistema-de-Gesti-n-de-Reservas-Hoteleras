@@ -28,7 +28,7 @@ public final class ReservacionValidator {
 		}
 		
 		if(estadoActual.equals(EstadoReserva.FINALIZADA)|| estadoActual.equals(EstadoReserva.CANCELADA)){
-			throw new ReglaDeNegocioInvalidaException("Cambio no permitido");
+			throw new ReglaDeNegocioInvalidaException("Una reservacion finalizada o cancelada no se puede modificar");
 		}
 		
 		List<EstadoReserva> cambiosDis = cambiosDisponibles.getOrDefault(estadoActual, List.of());
@@ -60,14 +60,14 @@ public final class ReservacionValidator {
 		if(!reservacion.getFechaFin().equals(request.fechaFin()) &&(
 				!reservacion.getEstadoReserva().equals(EstadoReserva.CONFIRMADA) &&
 				!reservacion.getEstadoReserva().equals(EstadoReserva.EN_CURSO)) ) {
-				throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha salida  porque"
+				throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha salida porque"
 						+ "ya no esta en estado confirmada o en curso");
 			}
 		
 		if(!reservacion.getFechaInicio().equals(request.fechaInicio()) &&
 				!reservacion.getEstadoReserva().equals(EstadoReserva.CONFIRMADA)) {
-			throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha de salida  porque"
-					+ "ya no esta en estado confirmada");}
+			throw new ReglaDeNegocioInvalidaException("No se puede modificar la fecha de entrada porque"
+					+ " esta en curso");}
 			
 	}
 	
